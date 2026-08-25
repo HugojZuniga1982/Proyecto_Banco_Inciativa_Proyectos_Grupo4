@@ -3,23 +3,25 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class CatalogosService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  // 1. Sectores Principales
+  // 1. Sectores Principales (donde sector_padre_id es nulo)
   Future<List<Map<String, dynamic>>> obtenerSectoresPrincipales() async {
     final res = await _supabase
         .from('sectores')
         .select('id, codigo, nombre')
-        .is_('sector_padre_id', null)
+        .isFilter('sector_padre_id', null)
         .eq('estado', 'ACTIVO')
         .order('nombre');
     return List<Map<String, dynamic>>.from(res);
   }
 
   // 2. Subsectores según el Sector Seleccionado (En Cascada)
-  Future<List<Map<String, dynamic>>> obtenerSubsectores(String sectorId) async {
+  Future<List<Map<String, dynamic>>> obtenerSubsectores(
+    String sectorPadreId,
+  ) async {
     final res = await _supabase
-        .from('subsectores')
+        .from('sectores')
         .select('id, codigo, nombre')
-        .eq('sector_id', sectorId)
+        .eq('sector_padre_id', sectorPadreId)
         .eq('estado', 'ACTIVO')
         .order('nombre');
     return List<Map<String, dynamic>>.from(res);
@@ -65,7 +67,9 @@ class CatalogosService {
   }
 
   // 7. Municipios según Departamento (En Cascada)
-  Future<List<Map<String, dynamic>>> obtenerMunicipios(String departamentoId) async {
+  Future<List<Map<String, dynamic>>> obtenerMunicipios(
+    String departamentoId,
+  ) async {
     final res = await _supabase
         .from('municipios')
         .select('id, codigo, nombre')
