@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto_programacion_movil_grupo_4/models/models.dart';
-import '../../services/services.dart';
+import '../../../../models/models.dart';
+import '../../services/rol_service.dart';
 import 'gestion_usuarios_page.dart';
 import 'pagina_prueba_permisos.dart';
 
@@ -137,7 +137,7 @@ class _AdministracionRolesPageState extends State<AdministracionRolesPage> {
               margin: const EdgeInsets.all(8),
               child: ListView.separated(
                 itemCount: _roles.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, i) {
                   final rol = _roles[i];
                   final seleccionado = rol['id'] == _rolSeleccionadoId;
@@ -148,7 +148,7 @@ class _AdministracionRolesPageState extends State<AdministracionRolesPage> {
                     ),
                     subtitle: Text(rol['codigo'] ?? ''),
                     selected: seleccionado,
-                    selectedTileColor: Colors.blue.withOpacity(0.1),
+                    selectedTileColor: Colors.blue.withValues(alpha: 0.1),
                     onTap: () => _seleccionarRol(rol['id']),
                   );
                 },

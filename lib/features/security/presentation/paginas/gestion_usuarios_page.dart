@@ -227,7 +227,7 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: _usuarios.length,
-                  separatorBuilder: (_, __) => const Divider(),
+                  separatorBuilder: (_, _) => const Divider(),
                   itemBuilder: (context, i) {
                     final u = _usuarios[i];
                     final institucion = u['instituciones']?['codigo'] ?? 'Sin Entidad';
