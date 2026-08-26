@@ -11,7 +11,10 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-
+# Construcciones de Android
+android/build/
+android/app/build/
+.gradle/
 # IntelliJ related
 *.iml
 *.ipr
