@@ -19,8 +19,29 @@ void main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eHp1cXBvZ211YXlmZWZpdWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1OTc4NzYsImV4cCI6MjEwMzE3Mzg3Nn0.Qr2vM2Bi_ylycYXbP9voIQhHHoRyIQq3r6cfeLt0p0w',
   );
 
-  String supabaseUrl = rawUrl.trim().replaceAll('"', '').replaceAll("'", '');
-  String supabaseAnonKey = rawKey.trim().replaceAll('"', '').replaceAll("'", '');
+  String supabaseUrl = rawUrl
+      .trim()
+      .replaceAll('[', '')
+      .replaceAll(']', '')
+      .replaceAll('{', '')
+      .replaceAll('}', '')
+      .replaceAll('<', '')
+      .replaceAll('>', '')
+      .replaceAll('"', '')
+      .replaceAll("'", '')
+      .trim();
+
+  String supabaseAnonKey = rawKey
+      .trim()
+      .replaceAll('[', '')
+      .replaceAll(']', '')
+      .replaceAll('{', '')
+      .replaceAll('}', '')
+      .replaceAll('<', '')
+      .replaceAll('>', '')
+      .replaceAll('"', '')
+      .replaceAll("'", '')
+      .trim();
 
   if (supabaseUrl.isEmpty) {
     supabaseUrl = 'https://lxxzuqpogmuayfefiuiy.supabase.co';
