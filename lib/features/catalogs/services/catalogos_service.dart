@@ -16,12 +16,12 @@ class CatalogosService {
 
   // 2. Subsectores según el Sector Seleccionado (En Cascada)
   Future<List<Map<String, dynamic>>> obtenerSubsectores(
-    String sectorPadreId,
+    String sectorId,
   ) async {
     final res = await _supabase
-        .from('sectores')
+        .from('subsectores')
         .select('id, codigo, nombre')
-        .eq('sector_padre_id', sectorPadreId)
+        .eq('sector_id', sectorId)
         .eq('estado', 'ACTIVO')
         .order('nombre');
     return List<Map<String, dynamic>>.from(res);
