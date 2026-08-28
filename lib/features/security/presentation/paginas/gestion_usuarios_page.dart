@@ -275,6 +275,8 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
       return const Center(child: Text('No hay usuarios registrados.'));
     }
 
+    final esMovil = MediaQuery.of(context).size.width < 600;
+
     return Column(
       children: [
         if (widget.isEmbedded) ...[
@@ -283,29 +285,32 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Gestión de Usuarios',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF191C1E),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Gestión de Usuarios',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF191C1E),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Administración de cuentas institucionales y personal',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        color: Colors.grey,
+                      SizedBox(height: 4),
+                      Text(
+                        'Administración de cuentas institucionales y personal',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 16),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.add),
                   label: const Text('Nuevo Usuario'),
@@ -334,43 +339,56 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
               final institucion = u['instituciones']?['codigo'] ?? 'Sin Entidad';
               final List<dynamic> rolesAsignados = u['usuarios_roles'] ?? [];
 
-                    return Card(
-                      elevation: 2,
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.indigo.shade100,
-                          child: const Icon(Icons.person, color: Colors.indigo),
+              return Card(
+                elevation: 2,
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.indigo.shade100,
+                    child: const Icon(Icons.person, color: Colors.indigo),
+                  ),
+                  title: Text(
+                    '${u['nombres']} ${u['apellidos']} (${u['cargo']})',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Institución: $institucion | DNI: ${u['identidad']} | Celular: ${u['celular']}'),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        children: rolesAsignados.isEmpty
+                            ? [const Chip(label: Text('Sin Roles', style: TextStyle(color: Colors.red, fontSize: 11)))]
+                            : rolesAsignados.map((ur) {
+                                final nombreRol = ur['roles']?['nombre'] ?? '';
+                                return Chip(
+                                  backgroundColor: Colors.indigo.shade50,
+                                  label: Text(nombreRol, style: const TextStyle(fontSize: 11, color: Colors.indigo)),
+                                );
+                              }).toList(),
+                      ),
+                      if (esMovil) ...[
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.security, size: 18),
+                            label: const Text('Asignar Roles'),
+                            onPressed: () => _abrirModalAsignarRoles(u),
+                          ),
                         ),
-                        title: Text(
-                          '${u['nombres']} ${u['apellidos']} (${u['cargo']})',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Institución: $institucion | DNI: ${u['identidad']} | Celular: ${u['celular']}'),
-                            const SizedBox(height: 6),
-                            Wrap(
-                              spacing: 6,
-                              children: rolesAsignados.isEmpty
-                                  ? [const Chip(label: Text('Sin Roles', style: TextStyle(color: Colors.red, fontSize: 11)))]
-                                  : rolesAsignados.map((ur) {
-                                      final nombreRol = ur['roles']?['nombre'] ?? '';
-                                      return Chip(
-                                        backgroundColor: Colors.indigo.shade50,
-                                        label: Text(nombreRol, style: const TextStyle(fontSize: 11, color: Colors.indigo)),
-                                      );
-                                    }).toList(),
-                            ),
-                          ],
-                        ),
-                        trailing: ElevatedButton.icon(
+                      ],
+                    ],
+                  ),
+                  trailing: esMovil
+                      ? null
+                      : ElevatedButton.icon(
                           icon: const Icon(Icons.security, size: 18),
                           label: const Text('Asignar Roles'),
                           onPressed: () => _abrirModalAsignarRoles(u),
                         ),
-                      ),
-                    );
+                ),
+              );
             },
           ),
         ),
