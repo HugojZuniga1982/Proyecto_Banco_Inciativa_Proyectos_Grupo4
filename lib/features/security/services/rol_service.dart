@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:proyecto_programacion_movil_grupo_4/models/models.dart';
 
 class RolService {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   Future<List<Map<String, dynamic>>> obtenerRoles() async {
     final respuesta = await _supabase

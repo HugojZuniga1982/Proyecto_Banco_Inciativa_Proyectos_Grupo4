@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/security/servicio_permisos.dart';
 import '../../security/presentation/paginas/navegacion_principal_page.dart';
+import '../../../../main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,6 +24,17 @@ class _LoginPageState extends State<LoginPage> {
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ingrese correo y contraseña.')),
+      );
+      return;
+    }
+
+    if (errorInicializacionSupabase != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al conectar con el servidor: $errorInicializacionSupabase'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 8),
+        ),
       );
       return;
     }

@@ -5,7 +5,7 @@ class ServicioPermisos {
   factory ServicioPermisos() => _instancia;
   ServicioPermisos._interno();
 
-  final SupabaseClient _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => Supabase.instance.client;
   Set<String> _permisosUsuario = {};
 
   String? userNombre;

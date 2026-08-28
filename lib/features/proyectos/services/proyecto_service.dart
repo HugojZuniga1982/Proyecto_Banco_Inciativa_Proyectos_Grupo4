@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/proyecto.dart';
 
 class ProyectoService {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   // 1. Obtener lista de proyectos activos con joins y relaciones secundarias
   Future<List<Proyecto>> obtenerProyectos() async {

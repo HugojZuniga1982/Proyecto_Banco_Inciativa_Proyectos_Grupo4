@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UsuarioService {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   // 1. Obtener lista de usuarios con su institución y roles asignados
   Future<List<Map<String, dynamic>>> obtenerUsuariosConRoles() async {
