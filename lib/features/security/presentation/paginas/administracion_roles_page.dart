@@ -137,6 +137,8 @@ class _AdministracionRolesPageState extends State<AdministracionRolesPage> {
   }
 
   Widget _buildBody(BuildContext context) {
+    final esMovil = MediaQuery.of(context).size.width < 768;
+
     return Column(
       children: [
         if (widget.isEmbedded) ...[
@@ -145,29 +147,32 @@ class _AdministracionRolesPageState extends State<AdministracionRolesPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Perfiles y Permisos',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF191C1E),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Perfiles y Permisos',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF191C1E),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Administración de roles del sistema y asignación de permisos',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        color: Colors.grey,
+                      SizedBox(height: 4),
+                      Text(
+                        'Administración de roles del sistema y asignación de permisos',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 16),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.science_outlined),
                   label: const Text('Ir a Pruebas'),
@@ -196,84 +201,99 @@ class _AdministracionRolesPageState extends State<AdministracionRolesPage> {
         Expanded(
           child: Row(
             children: [
-          // Panel Izquierdo: Lista de Perfiles / Roles
-          SizedBox(
-            width: 320,
-            child: Card(
-              margin: const EdgeInsets.all(8),
-              child: ListView.separated(
-                itemCount: _roles.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, i) {
-                  final rol = _roles[i];
-                  final seleccionado = rol['id'] == _rolSeleccionadoId;
-                  return ListTile(
-                    title: Text(
-                      rol['nombre'] ?? '',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(rol['codigo'] ?? ''),
-                    selected: seleccionado,
-                    selectedTileColor: Colors.blue.withValues(alpha: 0.1),
-                    onTap: () => _seleccionarRol(rol['id']),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // Panel Derecho: Árbol de Permisos
-          Expanded(
-            child: Card(
-              margin: const EdgeInsets.all(8),
-              child: _rolSeleccionadoId == null
-                  ? const Center(
-                      child: Text(
-                        'Seleccione un perfil para visualizar su árbol de permisos.',
-                      ),
-                    )
-                  : _cargando
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          color: Colors.amber.shade100,
-                          child: Row(
-                            children: [
-                              const Text(
-                                'Asignar Permisos a un Perfil de Sistema',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const Spacer(),
-                              ElevatedButton.icon(
-                                icon: const Icon(Icons.save),
-                                label: const Text('Guardar Permisos'),
-                                onPressed: _guardar,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView(
-                            padding: const EdgeInsets.all(12),
-                            children: _arbol
-                                .map(
-                                  (nodo) => _WidgetNodoArbol(
-                                    nodo: nodo,
-                                    onRefrescar: () => setState(() {}),
-                                  ),
-                                )
-                                    .toList(),
-                              ),
+              // Panel Izquierdo: Lista de Perfiles / Roles
+              if (!esMovil || _rolSeleccionadoId == null)
+                Expanded(
+                  flex: esMovil ? 1 : 0,
+                  child: SizedBox(
+                    width: esMovil ? null : 320,
+                    child: Card(
+                      margin: const EdgeInsets.all(8),
+                      child: ListView.separated(
+                        itemCount: _roles.length,
+                        separatorBuilder: (_, _) => const Divider(height: 1),
+                        itemBuilder: (context, i) {
+                          final rol = _roles[i];
+                          final seleccionado = rol['id'] == _rolSeleccionadoId;
+                          return ListTile(
+                            title: Text(
+                              rol['nombre'] ?? '',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                          ],
-                        ),
+                            subtitle: Text(rol['codigo'] ?? ''),
+                            selected: seleccionado,
+                            selectedTileColor: Colors.blue.withValues(alpha: 0.1),
+                            onTap: () => _seleccionarRol(rol['id']),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+
+              // Panel Derecho: Árbol de Permisos
+              if (!esMovil || _rolSeleccionadoId != null)
+                Expanded(
+                  child: Card(
+                    margin: const EdgeInsets.all(8),
+                    child: _rolSeleccionadoId == null
+                        ? const Center(
+                            child: Text(
+                              'Seleccione un perfil para visualizar su árbol de permisos.',
+                            ),
+                          )
+                        : _cargando
+                            ? const Center(child: CircularProgressIndicator())
+                            : Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                    color: Colors.amber.shade100,
+                                    child: Row(
+                                      children: [
+                                        if (esMovil)
+                                          IconButton(
+                                            icon: const Icon(Icons.arrow_back),
+                                            onPressed: () => setState(() {
+                                              _rolSeleccionadoId = null;
+                                            }),
+                                          ),
+                                        Expanded(
+                                          child: Text(
+                                            esMovil ? 'Permisos' : 'Asignar Permisos a un Perfil de Sistema',
+                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        ElevatedButton.icon(
+                                          icon: const Icon(Icons.save, size: 18),
+                                          label: Text(esMovil ? 'Guardar' : 'Guardar Permisos'),
+                                          onPressed: _guardar,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: ListView(
+                                      padding: const EdgeInsets.all(12),
+                                      children: _arbol
+                                          .map(
+                                            (nodo) => _WidgetNodoArbol(
+                                              nodo: nodo,
+                                              onRefrescar: () => setState(() {}),
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -327,9 +347,11 @@ class _WidgetNodoArbol extends StatelessWidget {
               ),
               const Icon(Icons.folder_open, size: 18, color: Colors.blueGrey),
               const SizedBox(width: 8),
-              Text(
-                nodo.nombre,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+              Expanded(
+                child: Text(
+                  nodo.nombre,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ),
             ],
           ),
@@ -348,7 +370,9 @@ class _WidgetNodoArbol extends StatelessWidget {
                     ),
                     const Icon(Icons.key, size: 14, color: Colors.amber),
                     const SizedBox(width: 6),
-                    Text(p.nombre),
+                    Expanded(
+                      child: Text(p.nombre),
+                    ),
                   ],
                 ),
               ),

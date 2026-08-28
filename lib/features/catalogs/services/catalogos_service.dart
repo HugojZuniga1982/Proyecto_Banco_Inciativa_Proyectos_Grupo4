@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CatalogosService {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   // 1. Sectores Principales (donde sector_padre_id es nulo)
   Future<List<Map<String, dynamic>>> obtenerSectoresPrincipales() async {

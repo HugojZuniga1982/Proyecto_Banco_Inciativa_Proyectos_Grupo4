@@ -1054,27 +1054,25 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
           'Tipo de Iniciativa *',
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54),
         ),
-        Row(
-          children: [
-            Radio<String>(
-              value: 'Proyecto',
-              groupValue: _tipoIniciativa,
-              onChanged: (v) => setState(() => _tipoIniciativa = v!),
-            ),
-            const Text('Proyecto'),
-            Radio<String>(
-              value: 'Programa',
-              groupValue: _tipoIniciativa,
-              onChanged: (v) => setState(() => _tipoIniciativa = v!),
-            ),
-            const Text('Programa'),
-            Radio<String>(
-              value: 'Estudio',
-              groupValue: _tipoIniciativa,
-              onChanged: (v) => setState(() => _tipoIniciativa = v!),
-            ),
-            const Text('Estudio'),
-          ],
+        RadioGroup<String>(
+          groupValue: _tipoIniciativa,
+          onChanged: (v) => setState(() => _tipoIniciativa = v!),
+          child: Row(
+            children: [
+              Radio<String>(
+                value: 'Proyecto',
+              ),
+              const Text('Proyecto'),
+              Radio<String>(
+                value: 'Programa',
+              ),
+              const Text('Programa'),
+              Radio<String>(
+                value: 'Estudio',
+              ),
+              const Text('Estudio'),
+            ],
+          ),
         ),
       ],
     );
@@ -1083,7 +1081,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
   Widget _buildPeriodoEjecucionDropdown() {
     return DropdownButtonFormField<String>(
       isExpanded: true,
-      value: _periodoEjecucionSeleccionado,
+      initialValue: _periodoEjecucionSeleccionado,
       decoration: const InputDecoration(
         labelText: 'Meses de Ejecución *',
         border: OutlineInputBorder(),
@@ -1117,7 +1115,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
 
     return DropdownButtonFormField<String>(
       isExpanded: true,
-      value: _coejecutoraSeleccionadaId,
+      initialValue: _coejecutoraSeleccionadaId,
       decoration: const InputDecoration(
         labelText: 'Institución Coejecutora',
         border: OutlineInputBorder(),
@@ -1203,7 +1201,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
   }) {
     return DropdownButtonFormField<String>(
       isExpanded: true,
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
@@ -1261,7 +1259,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
 
   Widget _buildRecommendationsCard() {
     return Card(
-      color: const Color(0xFF24389C).withOpacity(0.05),
+      color: const Color(0xFF24389C).withValues(alpha: 0.05),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Color(0xFFDEE0FF)),
