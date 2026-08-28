@@ -17,14 +17,40 @@ class UsuarioService {
     return List<Map<String, dynamic>>.from(respuesta);
   }
 
-  // 2. Obtener lista de instituciones activas para el selector
+  // 2. Obtener lista de instituciones activas para el selector, ordenadas por código de menor a mayor
   Future<List<Map<String, dynamic>>> obtenerInstituciones() async {
     final respuesta = await _supabase
         .from('instituciones')
         .select('id, codigo, nombre')
-        .eq('estado', 'ACTIVO')
-        .order('nombre');
-    return List<Map<String, dynamic>>.from(respuesta);
+        .eq('estado', 'ACTIVO');
+
+    final lista = List<Map<String, dynamic>>.from(respuesta);
+
+    // Ordenamiento natural por código (ej. 1, 2, 1.101, 10, 100, 411)
+    lista.sort((a, b) {
+      final String codA = a['codigo']?.toString() ?? '';
+      final String codB = b['codigo']?.toString() ?? '';
+
+      final partsA = codA.split('.');
+      final partsB = codB.split('.');
+
+      for (int i = 0; i < partsA.length && i < partsB.length; i++) {
+        final int? valA = int.tryParse(partsA[i]);
+        final int? valB = int.tryParse(partsB[i]);
+
+        if (valA != null && valB != null) {
+          if (valA != valB) {
+            return valA.compareTo(valB);
+          }
+        } else {
+          final comp = partsA[i].compareTo(partsB[i]);
+          if (comp != 0) return comp;
+        }
+      }
+      return partsA.length.compareTo(partsB.length);
+    });
+
+    return lista;
   }
 
   // 3. Registrar nuevo usuario institucional en Supabase Auth

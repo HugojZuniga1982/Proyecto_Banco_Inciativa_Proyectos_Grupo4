@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../../../models/models.dart';
 import '../../services/rol_service.dart';
-import 'gestion_usuarios_page.dart';
 import 'pagina_prueba_permisos.dart';
+import 'menu_lateral_bip.dart';
+import '../../../../core/security/servicio_permisos.dart';
+import 'acceso_denegado_widget.dart';
 
 class AdministracionRolesPage extends StatefulWidget {
-  const AdministracionRolesPage({super.key});
+  final bool isEmbedded;
+  final void Function(String tab, Proyecto? proyecto)? onNavigate;
+
+  const AdministracionRolesPage({
+    super.key,
+    this.isEmbedded = false,
+    this.onNavigate,
+  });
 
   @override
   State<AdministracionRolesPage> createState() =>
@@ -88,7 +97,19 @@ class _AdministracionRolesPageState extends State<AdministracionRolesPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!ServicioPermisos().tiene('seguridad.roles.consultar')) {
+      return const AccesoDenegadoWidget(
+        permisoRequerido: 'seguridad.roles.consultar',
+        tituloSeccion: 'Perfiles y Permisos',
+      );
+    }
+
+    if (widget.isEmbedded) {
+      return _buildBody(context);
+    }
+
     return Scaffold(
+      drawer: const MenuLateralBip(rutaActiva: 'roles'),
       appBar: AppBar(
         title: const Text('Administración de Perfiles y Permisos'),
         actions: [
@@ -108,28 +129,73 @@ class _AdministracionRolesPageState extends State<AdministracionRolesPage> {
               );
             },
           ),
-          const SizedBox(width: 8),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.people_outline),
-            label: const Text('Gestionar Usuarios y Roles'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.indigo,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const GestionUsuariosPage(),
-                ),
-              );
-            },
-          ),
           const SizedBox(width: 16),
         ],
       ),
-      body: Row(
-        children: [
+      body: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return Column(
+      children: [
+        if (widget.isEmbedded) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Perfiles y Permisos',
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF191C1E),
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Administración de roles del sistema y asignación de permisos',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.science_outlined),
+                  label: const Text('Ir a Pruebas'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF24389C),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PaginaPruebaPermisos(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+        ],
+        Expanded(
+          child: Row(
+            children: [
           // Panel Izquierdo: Lista de Perfiles / Roles
           SizedBox(
             width: 320,
@@ -201,15 +267,17 @@ class _AdministracionRolesPageState extends State<AdministracionRolesPage> {
                                     onRefrescar: () => setState(() {}),
                                   ),
                                 )
-                                .toList(),
-                          ),
+                                    .toList(),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
