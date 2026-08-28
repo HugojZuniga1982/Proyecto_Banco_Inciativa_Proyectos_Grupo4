@@ -200,7 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 16,
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         height: 1.5,
                       ),
                     ),
@@ -208,9 +208,9 @@ class _LoginPageState extends State<LoginPage> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white.withOpacity(0.12)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                       ),
                       child: Row(
                         children: [
@@ -227,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
                                 const SizedBox(height: 4),
                                 Text(
                                   'Autenticación institucional y control de acceso basado en roles (RBAC).',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                                 ),
                               ],
                             ),

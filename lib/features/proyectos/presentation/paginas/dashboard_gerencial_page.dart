@@ -110,29 +110,32 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dashboard Gerencial',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF191C1E),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dashboard Gerencial',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF191C1E),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Indicadores ejecutivos y resumen de inversiones',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        color: Colors.grey,
+                      SizedBox(height: 4),
+                      Text(
+                        'Indicadores ejecutivos y resumen de inversiones',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 16),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.refresh),
                   label: const Text('Actualizar'),
@@ -235,7 +238,7 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: color.withOpacity(0.1),
+              backgroundColor: color.withValues(alpha: 0.1),
               child: Icon(icon, size: 30, color: color),
             ),
             const SizedBox(width: 16),
