@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../services/services.dart';
+import 'menu_lateral_bip.dart';
+import '../../../../core/security/servicio_permisos.dart';
+import 'acceso_denegado_widget.dart';
+import '../../../../models/proyecto.dart';
 
 class GestionUsuariosPage extends StatefulWidget {
-  const GestionUsuariosPage({super.key});
+  final bool isEmbedded;
+  final void Function(String tab, Proyecto? proyecto)? onNavigate;
+
+  const GestionUsuariosPage({
+    super.key,
+    this.isEmbedded = false,
+    this.onNavigate,
+  });
 
   @override
   State<GestionUsuariosPage> createState() => _GestionUsuariosPageState();
@@ -116,6 +127,7 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
     final celularCtrl = TextEditingController();
     final cargoCtrl = TextEditingController();
     String? institucionSeleccionadaId;
+    String? institucionSeleccionadaNombre;
 
     if (!mounted) return;
 
@@ -132,16 +144,35 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        decoration: const InputDecoration(labelText: 'Institución / UPEG', border: OutlineInputBorder()),
-                        items: instituciones.map((inst) {
-                          return DropdownMenuItem<String>(
-                            value: inst['id'],
-                            child: Text('${inst['codigo']} - ${inst['nombre']}', overflow: TextOverflow.ellipsis),
+                      InkWell(
+                        onTap: () async {
+                          final seleccion = await showDialog<Map<String, dynamic>>(
+                            context: context,
+                            builder: (context) => _BuscarInstitucionDialog(instituciones: instituciones),
                           );
-                        }).toList(),
-                        onChanged: (val) => setModalState(() => institucionSeleccionadaId = val),
+                          if (seleccion != null) {
+                            setModalState(() {
+                              institucionSeleccionadaId = seleccion['id'];
+                              institucionSeleccionadaNombre = '${seleccion['codigo']} - ${seleccion['nombre']}';
+                            });
+                          }
+                        },
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Institución / UPEG',
+                            border: OutlineInputBorder(),
+                            suffixIcon: Icon(Icons.arrow_drop_down),
+                          ),
+                          child: Text(
+                            institucionSeleccionadaNombre ?? 'Seleccione una institución...',
+                            style: TextStyle(
+                              color: institucionSeleccionadaNombre == null
+                                  ? Colors.grey[600]
+                                  : Colors.black,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextField(controller: nombresCtrl, decoration: const InputDecoration(labelText: 'Nombres', border: OutlineInputBorder())),
@@ -207,31 +238,101 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!ServicioPermisos().tiene('seguridad.usuarios.consultar')) {
+      return const AccesoDenegadoWidget(
+        permisoRequerido: 'seguridad.usuarios.consultar',
+        tituloSeccion: 'Gestión de Usuarios',
+      );
+    }
+
+    if (widget.isEmbedded) {
+      return _buildBody(context);
+    }
+
     return Scaffold(
+      drawer: const MenuLateralBip(rutaActiva: 'usuarios'),
       appBar: AppBar(
         title: const Text('Gestión de Usuarios y Asignación de Roles'),
         actions: [
           ElevatedButton.icon(
             icon: const Icon(Icons.add),
             label: const Text('Nuevo Usuario'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF24389C), foregroundColor: Colors.white),
             onPressed: _abrirModalCrearUsuario,
           ),
           const SizedBox(width: 16),
         ],
       ),
-      body: _cargando
-          ? const Center(child: CircularProgressIndicator())
-          : _usuarios.isEmpty
-              ? const Center(child: Text('No hay usuarios registrados.'))
-              : ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _usuarios.length,
-                  separatorBuilder: (_, _) => const Divider(),
-                  itemBuilder: (context, i) {
-                    final u = _usuarios[i];
-                    final institucion = u['instituciones']?['codigo'] ?? 'Sin Entidad';
-                    final List<dynamic> rolesAsignados = u['usuarios_roles'] ?? [];
+      body: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    if (_cargando) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_usuarios.isEmpty) {
+      return const Center(child: Text('No hay usuarios registrados.'));
+    }
+
+    return Column(
+      children: [
+        if (widget.isEmbedded) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Gestión de Usuarios',
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF191C1E),
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Administración de cuentas institucionales y personal',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('Nuevo Usuario'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF24389C),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: _abrirModalCrearUsuario,
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+        ],
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: _usuarios.length,
+            separatorBuilder: (_, _) => const Divider(),
+            itemBuilder: (context, i) {
+              final u = _usuarios[i];
+              final institucion = u['instituciones']?['codigo'] ?? 'Sin Entidad';
+              final List<dynamic> rolesAsignados = u['usuarios_roles'] ?? [];
 
                     return Card(
                       elevation: 2,
@@ -270,8 +371,94 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
                         ),
                       ),
                     );
-                  },
-                ),
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BuscarInstitucionDialog extends StatefulWidget {
+  final List<Map<String, dynamic>> instituciones;
+  const _BuscarInstitucionDialog({required this.instituciones});
+
+  @override
+  State<_BuscarInstitucionDialog> createState() => _BuscarInstitucionDialogState();
+}
+
+class _BuscarInstitucionDialogState extends State<_BuscarInstitucionDialog> {
+  final _searchCtrl = TextEditingController();
+  List<Map<String, dynamic>> _filtered = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filtered = widget.instituciones;
+  }
+
+  void _filter(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filtered = widget.instituciones;
+      } else {
+        final q = query.toLowerCase();
+        _filtered = widget.instituciones.where((inst) {
+          final codigo = inst['codigo']?.toString().toLowerCase() ?? '';
+          final nombre = inst['nombre']?.toString().toLowerCase() ?? '';
+          return codigo.contains(q) || nombre.contains(q);
+        }).toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Buscar Institución / UPEG'),
+      content: SizedBox(
+        width: 450,
+        height: 400,
+        child: Column(
+          children: [
+            TextField(
+              controller: _searchCtrl,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Buscar por nombre o código...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: _filter,
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filtered.length,
+                itemBuilder: (context, index) {
+                  final inst = _filtered[index];
+                  return ListTile(
+                    title: Text('${inst['codigo']} - ${inst['nombre']}'),
+                    onTap: () => Navigator.pop(context, inst),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cerrar'),
+        ),
+      ],
     );
   }
 }
