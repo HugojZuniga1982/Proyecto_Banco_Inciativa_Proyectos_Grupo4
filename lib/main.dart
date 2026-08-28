@@ -17,14 +17,25 @@ void main() async {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eHp1cXBvZ211YXlmZWZpdWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1OTc4NzYsImV4cCI6MjEwMzE3Mzg3Nn0.Qr2vM2Bi_ylycYXbP9voIQhHHoRyIQq3r6cfeLt0p0w',
   );
 
-  // 2. Inicialización de Supabase con protección try-catch
+  // 2. Inicialización de Supabase con respaldo para modo incógnito (EmptyLocalStorage)
   try {
     await Supabase.initialize(
       url: supabaseUrl,
       publishableKey: supabaseAnonKey,
     );
-  } catch (e, stack) {
-    debugPrint('Error inicializando Supabase: $e\n$stack');
+  } catch (e) {
+    debugPrint('Aviso: Falló almacenamiento local de Supabase ($e). Reintentando con EmptyLocalStorage...');
+    try {
+      await Supabase.initialize(
+        url: supabaseUrl,
+        publishableKey: supabaseAnonKey,
+        authOptions: const FlutterAuthClientOptions(
+          localStorage: EmptyLocalStorage(),
+        ),
+      );
+    } catch (e2, stack) {
+      debugPrint('Error crítico inicializando Supabase: $e2\n$stack');
+    }
   }
 
   runApp(const MyApp());
