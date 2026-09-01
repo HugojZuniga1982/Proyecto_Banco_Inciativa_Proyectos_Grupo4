@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../models/proyecto.dart';
 import '../../../../core/security/servicio_permisos.dart';
@@ -613,6 +614,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                       maxLines: 2,
                       maxLength: 150,
                       validator: (v) => v!.isEmpty ? 'Campo obligatorio' : null,
+                      hintText: 'Ej: Ampliación de cobertura de agua potable en zona rural',
                     ),
                     _buildSearchableInstitucionField(),
                     _buildCoejecutoraDropdown(),
@@ -649,6 +651,9 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                       controller: _vidaUtilCtrl,
                       keyboardType: TextInputType.number,
                       validator: (v) => v!.isEmpty ? 'Campo obligatorio' : null,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                     ),
                     _buildPeriodoEjecucionDropdown(),
                   ], isDesktop: isDesktop),
@@ -666,6 +671,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                       maxLines: 2,
                       maxLength: 500,
                       validator: (v) => v!.isEmpty ? 'Campo obligatorio' : null,
+                      hintText: 'Ej: Aumentar cobertura y calidad de agua potable en las comunidades rurales',
                     ),
                     _buildTextField(
                       label: 'Descripción del Problema / Necesidad *',
@@ -673,6 +679,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                       maxLines: 2,
                       maxLength: 500,
                       validator: (v) => v!.isEmpty ? 'Campo obligatorio' : null,
+                      hintText: 'Ej: Más del 60% de la población rural carece de agua potable, provocando enfermedades gastrointestinales',
                     ),
                   ], isDesktop: isDesktop),
                 ),
@@ -698,6 +705,10 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                     if (double.tryParse(v) == null) return 'Ingrese un valor numérico';
                     return null;
                   },
+                  hintText: 'Ej: 1500000',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildDropdown(
                   label: 'Departamento *',
@@ -715,16 +726,19 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                   label: 'Coordenadas Georreferenciadas (UTM WGS84)',
                   controller: _coordenadasUtmCtrl,
                   maxLength: 50,
+                  hintText: 'Ej: 16P 710500E 1525000N',
                 ),
                 _buildTextField(
                   label: 'Entregable Principal',
                   controller: _entregablePrincipalCtrl,
                   maxLength: 100,
+                  hintText: 'Ej: Sistema de agua potable completamente instalado',
                 ),
                 _buildTextField(
                   label: 'Finalidad de la Intervención',
                   controller: _finalidadIntervencionCtrl,
                   maxLength: 250,
+                  hintText: 'Ej: Mejorar acceso a agua potable y reducir enfermedades hídricas',
                 ),
                 _buildTextField(
                   label: '% Inversión Real',
@@ -736,6 +750,10 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                     if (val == null || val < 1 || val > 100) return 'Entre 1 y 100';
                     return null;
                   },
+                  hintText: 'Ej: 70 (requiere sumar 100 con Desarrollo Humano)',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildTextField(
                   label: '% Desarrollo Humano',
@@ -747,16 +765,25 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                     if (val == null || val < 1 || val > 100) return 'Entre 1 y 100';
                     return null;
                   },
+                  hintText: 'Ej: 30 (requiere sumar 100 con Inversión Real)',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildTextField(
                   label: 'Costo Estimado Anual de O&M',
                   controller: _costoAnualOperacionCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 100000',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildTextField(
                   label: 'Entidad Responsable de O&M',
                   controller: _entidadResponsableOperacionCtrl,
                   maxLength: 100,
+                  hintText: 'Ej: Municipalidad de San Pedro Sula',
                 ),
                 _buildDropdown(
                   label: 'Posibles Fuentes de Financiamiento',
@@ -769,6 +796,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                   controller: _aspectosTecnicosCtrl,
                   maxLines: 2,
                   maxLength: 500,
+                  hintText: 'Ej: Tuberías PVC, capacidad 50 litros/segundo, profundidad máx 100m',
                 ),
               ], isDesktop: isDesktop),
             ),
@@ -793,7 +821,15 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                           Expanded(
                             child: TextField(
                               controller: _compNombreCtrl,
-                              decoration: const InputDecoration(labelText: 'Nombre Componente', border: OutlineInputBorder()),
+                              decoration: const InputDecoration(
+                                labelText: 'Nombre Componente',
+                                hintText: 'Ej: Perforación de pozo',
+                                hintStyle: TextStyle(
+                                  color: Color(0xFF5B7FDB),
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                border: OutlineInputBorder(),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -802,7 +838,18 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                             child: TextField(
                               controller: _compCostoCtrl,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Costo (Lps)', border: OutlineInputBorder()),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                              ],
+                              decoration: const InputDecoration(
+                                labelText: 'Costo (Lps)',
+                                hintText: 'Ej: 500000',
+                                hintStyle: TextStyle(
+                                  color: Color(0xFF5B7FDB),
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                border: OutlineInputBorder(),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -854,7 +901,15 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                       _buildResponsiveGrid([
                         TextField(
                           controller: _estNombreCtrl,
-                          decoration: const InputDecoration(labelText: 'Nombre del Estudio', border: OutlineInputBorder()),
+                          decoration: const InputDecoration(
+                            labelText: 'Nombre del Estudio',
+                            hintText: 'Ej: Estudio de prefactibilidad',
+                            hintStyle: TextStyle(
+                              color: Color(0xFF5B7FDB),
+                              fontStyle: FontStyle.italic,
+                            ),
+                            border: OutlineInputBorder(),
+                          ),
                         ),
                         TextField(
                           controller: _estFechaCtrl,
@@ -868,7 +923,15 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                         ),
                         TextField(
                           controller: _estObsCtrl,
-                          decoration: const InputDecoration(labelText: 'Observaciones', border: OutlineInputBorder()),
+                          decoration: const InputDecoration(
+                            labelText: 'Observaciones',
+                            hintText: 'Ej: Completado sin observaciones relevantes',
+                            hintStyle: TextStyle(
+                              color: Color(0xFF5B7FDB),
+                              fontStyle: FontStyle.italic,
+                            ),
+                            border: OutlineInputBorder(),
+                          ),
                         ),
                       ], isDesktop: isDesktop),
                       const SizedBox(height: 12),
@@ -923,46 +986,82 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                   label: 'Costo Anual Equivalente (CAE)',
                   controller: _evalCaeCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 75000',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildTextField(
                   label: 'Relación Costo - Eficiencia',
                   controller: _evalCostoEficienciaCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 5.25',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildTextField(
                   label: 'Valor Presente Neto (VPN)',
                   controller: _evalVpnCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 250000',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildTextField(
                   label: 'Relación Beneficio / Costo (B/C)',
                   controller: _evalBeneficioCostoCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 1.85',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildTextField(
                   label: 'Tasa Interna de Retorno (TIR %)',
                   controller: _evalTirCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 18.5',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                 ),
                 _buildTextField(
                   label: 'Beneficiarios Directos',
                   controller: _beneficiariosDirectosCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 5000',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                 ),
                 _buildTextField(
                   label: 'Beneficiarios Indirectos',
                   controller: _beneficiariosIndirectosCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 15000',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                 ),
                 _buildTextField(
                   label: 'Empleos Directos Generados',
                   controller: _empleosDirectosCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 45',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                 ),
                 _buildTextField(
                   label: 'Empleos Indirectos Generados',
                   controller: _empleosIndirectosCtrl,
                   keyboardType: TextInputType.number,
+                  hintText: 'Ej: 120',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
                 ),
               ], isDesktop: isDesktop),
             ),
@@ -1132,6 +1231,8 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
     int? maxLength,
+    String? hintText,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     if (maxLength == null) {
       return TextFormField(
@@ -1139,8 +1240,14 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
         maxLines: maxLines,
         keyboardType: keyboardType,
         validator: validator,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
+          hintText: hintText,
+          hintStyle: const TextStyle(
+            color: Color(0xFF5B7FDB),
+            fontStyle: FontStyle.italic,
+          ),
           border: const OutlineInputBorder(),
           alignLabelWithHint: true,
         ),
@@ -1182,9 +1289,15 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
           keyboardType: keyboardType,
           validator: validator,
           maxLength: maxLength,
+          inputFormatters: inputFormatters,
           buildCounter: (context, {required currentLength, required isFocused, required maxLength}) => null,
           decoration: InputDecoration(
             labelText: label,
+            hintText: hintText,
+            hintStyle: const TextStyle(
+              color: Color(0xFF5B7FDB),
+              fontStyle: FontStyle.italic,
+            ),
             border: const OutlineInputBorder(),
             alignLabelWithHint: true,
           ),
