@@ -98,53 +98,64 @@ class ProyectoService {
   }
 
   // 4. Obtener las métricas e indicadores de inversión para el dashboard gerencial
-  Future<Map<String, dynamic>> obtenerMetricasDashboard({String? institucionId}) async {
-    var query = _supabase
-        .from('proyectos')
-        .select('''
-          id,
-          costo_total,
-          subsector_id,
-          subsectores(
-            nombre,
-            sectores(id, nombre)
-          )
-        ''')
-        .eq('estado', 'ACTIVO');
+Future<Map<String, dynamic>> obtenerMetricasDashboard({String? institucionId}) async {
+  var query = _supabase
+      .from('proyectos')
+      .select('''
+        id,
+        costo_total,
+        subsector_id,
+        estado_proceso,
+        subsectores(
+          nombre,
+          sectores(id, nombre)
+        )
+      ''')
+      .eq('estado', 'ACTIVO');
 
-    if (institucionId != null) {
-      query = query.eq('institucion_id', institucionId);
-    }
-
-    final res = await query;
-
-    double costoAcumulado = 0.0;
-    int totalProyectos = res.length;
-    Map<String, int> proyectosPorSector = {};
-    Map<String, double> costoPorSector = {};
-
-    for (var row in res) {
-      double costo = (row['costo_total'] as num?)?.toDouble() ?? 0.0;
-      costoAcumulado += costo;
-
-      // Navegar en cascada el sector desde el subsector
-      final sector = row['subsectores']?['sectores'];
-      if (sector != null) {
-        String sectorNombre = sector['nombre'] ?? 'Otros';
-        proyectosPorSector[sectorNombre] =
-            (proyectosPorSector[sectorNombre] ?? 0) + 1;
-        costoPorSector[sectorNombre] =
-            (costoPorSector[sectorNombre] ?? 0.0) + costo;
-      }
-    }
-
-    return {
-      'totalProyectos': totalProyectos,
-      'costoAcumulado': costoAcumulado,
-      'proyectosPorSector': proyectosPorSector,
-      'costoPorSector': costoPorSector,
-    };
+  if (institucionId != null) {
+    query = query.eq('institucion_id', institucionId);
   }
+
+  final res = await query;
+
+  double costoAcumulado = 0.0;
+  int totalProyectos = res.length;
+  int totalAprobados = 0;
+  Map<String, int> proyectosPorSector = {};
+  Map<String, double> costoPorSector = {};
+  Map<String, int> proyectosPorEstado = {};
+
+  for (var row in res) {
+    double costo = (row['costo_total'] as num?)?.toDouble() ?? 0.0;
+    costoAcumulado += costo;
+
+    final estado = row['estado_proceso'] ?? 'INGRESADO';
+    proyectosPorEstado[estado] = (proyectosPorEstado[estado] ?? 0) + 1;
+
+    if (estado == 'APROBADO') {
+      totalAprobados++;
+    }
+
+    final sector = row['subsectores']?['sectores'];
+    if (sector != null) {
+      String sectorNombre = sector['nombre'] ?? 'Otros';
+      proyectosPorSector[sectorNombre] = (proyectosPorSector[sectorNombre] ?? 0) + 1;
+      costoPorSector[sectorNombre] = (costoPorSector[sectorNombre] ?? 0.0) + costo;
+    }
+  }
+
+  final tasaAprobacion = totalProyectos > 0 ? (totalAprobados / totalProyectos) : 0.0;
+
+  return {
+    'totalProyectos': totalProyectos,
+    'costoAcumulado': costoAcumulado,
+    'tasaAprobacion': tasaAprobacion,
+    'proyectosPorSector': proyectosPorSector,
+    'costoPorSector': costoPorSector,
+    'proyectosPorEstado': proyectosPorEstado,
+  };
+}
 
   // 5. Actualizar el estado de proceso de una ficha BIP
   Future<void> actualizarEstadoProceso(String id, String nuevoEstado) async {
