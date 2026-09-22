@@ -62,4 +62,41 @@ class RolService {
       params: {'id_rol': idRol, 'ids_permisos': idsPermisos},
     );
   }
+
+  // Crear un nuevo Rol / Perfil de Sistema
+  Future<Map<String, dynamic>> crearRol({
+    required String codigo,
+    required String nombre,
+    required String descripcion,
+  }) async {
+    final datos = {
+      'codigo': codigo.trim().toUpperCase(),
+      'nombre': nombre.trim(),
+      'descripcion': descripcion.trim(),
+      'esta_activo': true,
+      'es_sistema': false,
+    };
+
+    final respuesta = await _supabase
+        .from('roles')
+        .insert(datos)
+        .select('id, codigo, nombre, descripcion')
+        .single();
+
+    // Auditoría
+    try {
+      final userActualId = _supabase.auth.currentUser?.id;
+      if (userActualId != null) {
+        await _supabase.from('bitacora_auditoria').insert({
+          'usuario_id': userActualId,
+          'accion': 'CREAR_ROL',
+          'tipo_entidad': 'ROLES',
+          'entidad_id': respuesta['id'].toString(),
+          'valores_nuevos': datos,
+        });
+      }
+    } catch (_) {}
+
+    return Map<String, dynamic>.from(respuesta);
+  }
 }
