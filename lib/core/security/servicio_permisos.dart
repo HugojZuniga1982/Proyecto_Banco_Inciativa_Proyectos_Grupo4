@@ -31,6 +31,7 @@ class ServicioPermisos {
             .select('''
               nombres, 
               apellidos, 
+              estado,
               instituciones(id, nombre), 
               usuarios_roles(roles(codigo))
             ''')
@@ -38,6 +39,11 @@ class ServicioPermisos {
             .maybeSingle();
 
         if (perfil != null) {
+          if (perfil['estado'] == 'INACTIVO') {
+            await _supabase.auth.signOut();
+            _permisosUsuario = {};
+            throw Exception('Esta cuenta de usuario ha sido desactivada. Comuníquese con el Administrador del Sistema.');
+          }
           userNombre = '${perfil['nombres']} ${perfil['apellidos']}';
           final inst = perfil['instituciones'];
           if (inst != null) {
