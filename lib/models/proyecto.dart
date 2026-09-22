@@ -97,11 +97,16 @@ class Proyecto {
     this.estudios = const [],
   });
 
-  /// Identificador funcional BIP oficial (Ej. BIP-2026-6E26CD7B)
+  /// Identificador funcional BIP oficial (Ej. BIP-2026-6E26CD7B o BIP-2026-00000001)
   String get codigoBip {
     final anio = fechaCreacion?.year ?? DateTime.now().year;
     if (id != null && id!.isNotEmpty) {
       final cleanId = id!.replaceAll('-', '').toUpperCase();
+      // Si el identificador es de datos iniciales con ceros repetidos (ej. e0000000-0000-...-0001)
+      if (cleanId.contains('000000') && cleanId.length >= 8) {
+        final lastPart = cleanId.substring(cleanId.length - 8);
+        return 'BIP-$anio-$lastPart';
+      }
       final shortId = cleanId.length >= 8 ? cleanId.substring(0, 8) : cleanId;
       return 'BIP-$anio-$shortId';
     }
