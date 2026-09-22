@@ -70,11 +70,13 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
         final identidad = (u['identidad'] ?? '').toString().toLowerCase();
         final celular = (u['celular'] ?? '').toString().toLowerCase();
         final cargo = (u['cargo'] ?? '').toString().toLowerCase();
+        final email = (u['email'] ?? '').toString().toLowerCase();
         final instCodigo = (u['instituciones']?['codigo'] ?? '').toString().toLowerCase();
         final instNombre = (u['instituciones']?['nombre'] ?? '').toString().toLowerCase();
 
         return nombres.contains(q) ||
             apellidos.contains(q) ||
+            email.contains(q) ||
             identidad.contains(q) ||
             celular.contains(q) ||
             cargo.contains(q) ||
@@ -306,6 +308,7 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
     final identidadCtrl = TextEditingController(text: usuario['identidad'] ?? '');
     final celularCtrl = TextEditingController(text: usuario['celular'] ?? '');
     final cargoCtrl = TextEditingController(text: usuario['cargo'] ?? '');
+    final emailCtrl = TextEditingController(text: usuario['email'] ?? '');
 
     String? institucionSeleccionadaId = usuario['institucion_id'] ?? usuario['instituciones']?['id'];
     String? institucionSeleccionadaNombre;
@@ -418,6 +421,15 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
                         controller: cargoCtrl,
                         decoration: const InputDecoration(labelText: 'Cargo Funcional *', border: OutlineInputBorder()),
                       ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: emailCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Correo Institucional / Acceso *',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.email_outlined),
+                        ),
+                      ),
                       const SizedBox(height: 16),
                       // Estado Activo / Inactivo con Switch
                       Container(
@@ -513,6 +525,7 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
                         cargo: cargoCtrl.text.trim(),
                         institucionId: institucionSeleccionadaId!,
                         estado: estadoSeleccionado,
+                        email: emailCtrl.text.trim(),
                       );
                       _mostrarMensaje('Usuario actualizado correctamente.');
                       _cargarDatos();
@@ -927,6 +940,30 @@ class _GestionUsuariosPageState extends State<GestionUsuariosPage> {
                                       Text(
                                         'DNI: ${u['identidad'] ?? 'N/A'}  |  Celular: ${u['celular'] ?? 'N/A'}',
                                         style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.email_outlined, size: 13, color: Color(0xFF24389C)),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Correo: ',
+                                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              u['email'] != null && u['email'].toString().trim().isNotEmpty
+                                                  ? u['email']
+                                                  : 'Sin correo registrado',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF24389C),
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
