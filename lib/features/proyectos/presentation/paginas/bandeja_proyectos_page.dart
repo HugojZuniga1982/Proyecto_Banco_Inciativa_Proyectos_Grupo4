@@ -147,26 +147,43 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.isEmbedded) ...[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Bandeja de Proyectos',
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF191C1E),
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Bandeja de Proyectos',
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF191C1E),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Gestión y monitoreo de iniciativas de inversión pública (BIP)',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Gestión y monitoreo de iniciativas de inversión pública (BIP)',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Actualizar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF24389C),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
+                  onPressed: _cargarProyectos,
                 ),
               ],
             ),
@@ -300,11 +317,14 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
                           IconButton(
                             icon: const Icon(Icons.visibility, color: Colors.blue),
                             tooltip: 'Visualizar Ficha',
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) => DetalleProyectoPage(proyecto: p)),
                               );
+                              if (mounted) {
+                                _cargarProyectos();
+                              }
                             },
                           ),
                           IconButton(
@@ -413,11 +433,14 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
                     TextButton.icon(
                       icon: const Icon(Icons.visibility, size: 18),
                       label: const Text('Ver'),
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => DetalleProyectoPage(proyecto: p)),
                         );
+                        if (mounted) {
+                          _cargarProyectos();
+                        }
                       },
                     ),
                     const SizedBox(width: 8),
