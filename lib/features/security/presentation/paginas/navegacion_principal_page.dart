@@ -21,11 +21,13 @@ class _NavegacionPrincipalPageState extends State<NavegacionPrincipalPage> {
   String _activeTab = 'proyectos';
   Proyecto? _proyectoAEditar;
   bool _sidebarExpanded = true;
+  int _refreshCounter = 0;
 
   void _onNavigate(String tab, Proyecto? proyecto) {
     setState(() {
       _activeTab = tab;
       _proyectoAEditar = proyecto;
+      _refreshCounter++;
     });
   }
 
@@ -33,29 +35,36 @@ class _NavegacionPrincipalPageState extends State<NavegacionPrincipalPage> {
   switch (_activeTab) {
     case 'dashboard':
       return DashboardGerencialPage(
+        key: ValueKey('dashboard_$_refreshCounter'),
         isEmbedded: true,
         onNavigate: _onNavigate,
       );
     case 'reportes':
-      return const ReportesPage();
+      return ReportesPage(
+        key: ValueKey('reportes_$_refreshCounter'),
+      );
     case 'registro':
       return FichaProyectoPage(
+        key: ValueKey('registro_${_proyectoAEditar?.id ?? "nuevo"}_$_refreshCounter'),
         isEmbedded: true,
         proyectoAEditar: _proyectoAEditar,
         onNavigate: _onNavigate,
       );
     case 'proyectos':
       return BandejaProyectosPage(
+        key: ValueKey('proyectos_$_refreshCounter'),
         isEmbedded: true,
         onNavigate: _onNavigate,
       );
     case 'usuarios':
       return GestionUsuariosPage(
+        key: ValueKey('usuarios_$_refreshCounter'),
         isEmbedded: true,
         onNavigate: _onNavigate,
       );
     case 'roles':
       return AdministracionRolesPage(
+        key: ValueKey('roles_$_refreshCounter'),
         isEmbedded: true,
         onNavigate: _onNavigate,
       );
@@ -365,6 +374,7 @@ class _NavegacionPrincipalPageState extends State<NavegacionPrincipalPage> {
             if (tabId != 'registro') {
               _proyectoAEditar = null;
             }
+            _refreshCounter++;
           });
           // On mobile, close drawer after tap
           final isMobile = MediaQuery.of(context).size.width <= 900;

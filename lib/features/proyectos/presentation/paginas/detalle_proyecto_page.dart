@@ -15,6 +15,7 @@ class DetalleProyectoPage extends StatefulWidget {
 class _DetalleProyectoPageState extends State<DetalleProyectoPage> {
   late String _estadoProceso;
   bool _actualizando = false;
+  bool _huboCambios = false;
   final _proyectoService = ProyectoService();
 
   @override
@@ -31,6 +32,7 @@ class _DetalleProyectoPageState extends State<DetalleProyectoPage> {
       setState(() {
         _estadoProceso = nuevoEstado;
         _actualizando = false;
+        _huboCambios = true;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -58,11 +60,21 @@ class _DetalleProyectoPageState extends State<DetalleProyectoPage> {
     final size = MediaQuery.of(context).size;
     final isDesktop = size.width > 800;
 
-    return Scaffold(
-      backgroundColor: Colors.blueGrey[50],
-      appBar: AppBar(
-        title: const Text('Ficha Técnica de Proyecto (BIP)'),
-      ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.pop(context, _huboCambios);
+      },
+      child: Scaffold(
+        backgroundColor: Colors.blueGrey[50],
+        appBar: AppBar(
+          title: const Text('Ficha Técnica de Proyecto (BIP)'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context, _huboCambios),
+          ),
+        ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -122,8 +134,9 @@ class _DetalleProyectoPageState extends State<DetalleProyectoPage> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildWorkflowBar() {
     final userSp = ServicioPermisos();
