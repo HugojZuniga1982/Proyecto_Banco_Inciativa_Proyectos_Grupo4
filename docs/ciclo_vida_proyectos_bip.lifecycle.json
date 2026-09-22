@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Ciclo de Vida de Iniciativas de Proyectos BIP",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "viewBox": [980, 680],
+    "views": [
+      {
+        "id": "fase-tramitacion",
+        "label": "1. Riel de Tramitación",
+        "focus": ["formulacion", "revision_upeg", "dictamen_sefin", "aprobado_bip", "en_ejecucion"],
+        "note": "Maduración de la iniciativa desde borrador hasta ejecución presupuestaria."
+      },
+      {
+        "id": "fase-evaluacion",
+        "label": "2. Filtros y Observaciones",
+        "focus": ["dictamen_sefin", "observaciones", "rechazado", "aprobado_bip"],
+        "note": "Filtro técnico y fiscal de viabilidad socioeconómica."
+      },
+      {
+        "id": "fase-salidas",
+        "label": "3. Salidas y Cierres",
+        "focus": ["aprobado_bip", "subsanacion", "desestimado", "en_ejecucion", "pausado", "concluido"],
+        "note": "Resultados terminales de priorización, cierre y desistimiento."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Fases Principales de Inversión" },
+    { "id": "waiting", "label": "Revisión y Dictámenes" },
+    { "id": "recovery", "label": "Ajustes y Subsanación" },
+    { "id": "terminal", "label": "Estados Finales / Salidas" }
+  ],
+  "states": [
+    {
+      "id": "formulacion",
+      "type": "start",
+      "label": "Formulación",
+      "sublabel": "Borrador UPEG",
+      "lane": "main",
+      "col": 0,
+      "step": "01",
+      "tag": "registro"
+    },
+    {
+      "id": "revision_upeg",
+      "type": "active",
+      "label": "Revisión UPEG",
+      "sublabel": "Verificación técnica",
+      "lane": "main",
+      "col": 1,
+      "step": "02",
+      "tag": "en_analisis"
+    },
+    {
+      "id": "dictamen_sefin",
+      "type": "decision",
+      "label": "Dictamen SEFIN",
+      "sublabel": "DGIP / SNIPH",
+      "lane": "main",
+      "col": 2,
+      "step": "03",
+      "tag": "evaluacion"
+    },
+    {
+      "id": "aprobado_bip",
+      "type": "waiting",
+      "label": "Aprobado BIP",
+      "sublabel": "Iniciativa priorizada",
+      "lane": "main",
+      "col": 3,
+      "step": "04",
+      "tag": "en_cartera"
+    },
+    {
+      "id": "en_ejecucion",
+      "type": "success",
+      "label": "En Ejecución",
+      "sublabel": "Presupuesto asignado",
+      "lane": "main",
+      "col": 4,
+      "step": "05",
+      "tag": "vigente"
+    },
+    {
+      "id": "observaciones",
+      "type": "waiting",
+      "label": "Con Observaciones",
+      "sublabel": "Dictamen condicionado",
+      "lane": "waiting",
+      "col": 0,
+      "tag": "pausa"
+    },
+    {
+      "id": "subsanacion",
+      "type": "active",
+      "label": "Subsanación",
+      "sublabel": "Enmienda técnica",
+      "lane": "recovery",
+      "col": 1,
+      "tag": "en_ajuste"
+    },
+    {
+      "id": "pausado",
+      "type": "waiting",
+      "label": "Pausado / Espera",
+      "sublabel": "Reprogramación fiscal",
+      "lane": "waiting",
+      "col": 2,
+      "tag": "espera"
+    },
+    {
+      "id": "rechazado",
+      "type": "failure",
+      "label": "Rechazado",
+      "sublabel": "No cumple viabilidad",
+      "lane": "terminal",
+      "col": 0,
+      "tag": "cerrado"
+    },
+    {
+      "id": "desestimado",
+      "type": "failure",
+      "label": "Desestimado",
+      "sublabel": "Plazo expirado",
+      "lane": "terminal",
+      "col": 1,
+      "tag": "archivado"
+    },
+    {
+      "id": "concluido",
+      "type": "success",
+      "label": "Concluido",
+      "sublabel": "Cierre y liquidación",
+      "lane": "terminal",
+      "col": 2,
+      "tag": "historico"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "dictamen_sefin",
+      "to": "observaciones",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "observaciones",
+      "to": "rechazado",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "aprobado_bip",
+      "to": "subsanacion",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "subsanacion",
+      "to": "desestimado",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "en_ejecucion",
+      "to": "pausado",
+      "variant": "dashed",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "pausado",
+      "to": "concluido",
+      "variant": "emphasis",
+      "route": "straight",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Riel de Maduración de Proyectos",
+      "items": [
+        "Las instituciones formulan perfiles y estudios de preinversión en el sistema.",
+        "La UPEG sectorial valida datos metodológicos antes de emitir a SEFIN.",
+        "SEFIN califica la admisibilidad socioeconómica y fiscal en el SNIPH."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Control de Calidad y Enmiendas",
+      "items": [
+        "Iniciativas con deficiencias técnicas entran en estado condicionado.",
+        "El formulador cuenta con ventana para subsanar sin perder el código BIP.",
+        "Si vencen los plazos de subsanación, el proyecto pasa a desestimado."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Cierres y Ejecución",
+      "items": [
+        "Un proyecto en cartera BIP puede recibir asignación presupuestaria plurianual.",
+        "Reprogramaciones o contingencias pueden pausar temporalmente el avance.",
+        "La conclusión satisfactoria archiva la iniciativa con trazabilidad histórica."
+      ]
+    }
+  ]
+}

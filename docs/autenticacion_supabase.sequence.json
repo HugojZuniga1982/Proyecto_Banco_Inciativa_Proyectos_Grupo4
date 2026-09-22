@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Flujo de Autenticación y Autorización con Supabase",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "column_fit": "spread",
+    "viewBox": [1060, 570],
+    "views": [
+      {
+        "id": "vista-login",
+        "label": "1. Validación de Credenciales",
+        "focus": ["usuario", "login_page", "supabase_auth", "postgres_db"],
+        "note": "Inicio de sesión institucional mediante Supabase GoTrue Auth."
+      },
+      {
+        "id": "vista-permisos",
+        "label": "2. Resolución RBAC",
+        "focus": ["login_page", "servicio_permisos", "supabase_api", "postgres_db"],
+        "note": "Carga de permisos efectivos vía RPC y perfil de usuario en memoria."
+      },
+      {
+        "id": "vista-navegacion",
+        "label": "3. UI Condicional",
+        "focus": ["usuario", "login_page", "servicio_permisos"],
+        "note": "Navegación al contenedor principal y evaluación con WidgetAutorizado."
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "usuario",
+      "type": "external",
+      "label": "Usuario BIP",
+      "sublabel": "Navegador Web / UI"
+    },
+    {
+      "id": "login_page",
+      "type": "frontend",
+      "label": "LoginPage",
+      "sublabel": "lib/features/auth"
+    },
+    {
+      "id": "servicio_permisos",
+      "type": "frontend",
+      "label": "ServicioPermisos",
+      "sublabel": "Singleton en memoria"
+    },
+    {
+      "id": "supabase_auth",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "GoTrue / JWT Tokens",
+      "brand": "supabase"
+    },
+    {
+      "id": "supabase_api",
+      "type": "backend",
+      "label": "PostgREST API",
+      "sublabel": "Gateway RPC y REST",
+      "brand": "supabase"
+    },
+    {
+      "id": "postgres_db",
+      "type": "database",
+      "label": "PostgreSQL DB",
+      "sublabel": "auth.users, perfiles, roles",
+      "brand": "postgresql"
+    }
+  ],
+  "segments": [
+    {
+      "from": 140,
+      "to": 295,
+      "label": "Autenticación de Credenciales"
+    },
+    {
+      "from": 305,
+      "to": 445,
+      "label": "Carga de Permisos RBAC y Perfil"
+    },
+    {
+      "from": 455,
+      "to": 485,
+      "label": "Navegación y UI Protegida"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-credenciales",
+      "from": "usuario",
+      "to": "login_page",
+      "y": 165,
+      "label": "Ingresa credenciales institucionales",
+      "variant": "default"
+    },
+    {
+      "id": "msg-sign-in",
+      "from": "login_page",
+      "to": "supabase_auth",
+      "y": 195,
+      "label": "signInWithPassword(email, password)",
+      "variant": "security"
+    },
+    {
+      "id": "msg-check-db",
+      "from": "supabase_auth",
+      "to": "postgres_db",
+      "y": 225,
+      "label": "Verificar credenciales (auth.users)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "msg-db-ok",
+      "from": "postgres_db",
+      "to": "supabase_auth",
+      "y": 255,
+      "label": "Hash válido y usuario activo",
+      "variant": "return"
+    },
+    {
+      "id": "msg-jwt-return",
+      "from": "supabase_auth",
+      "to": "login_page",
+      "y": 285,
+      "label": "Retorna AuthResponse (JWT + Session)",
+      "variant": "return"
+    },
+    {
+      "id": "msg-load-perms",
+      "from": "login_page",
+      "to": "servicio_permisos",
+      "y": 320,
+      "label": "cargarPermisosUsuario()",
+      "variant": "default"
+    },
+    {
+      "id": "msg-rpc-call",
+      "from": "servicio_permisos",
+      "to": "supabase_api",
+      "y": 350,
+      "label": "rpc('obtener_mis_permisos') [JWT]",
+      "variant": "security"
+    },
+    {
+      "id": "msg-rpc-exec",
+      "from": "supabase_api",
+      "to": "postgres_db",
+      "y": 380,
+      "label": "Evalúa roles_permisos y excepciones",
+      "variant": "emphasis"
+    },
+    {
+      "id": "msg-profile-return",
+      "from": "postgres_db",
+      "to": "servicio_permisos",
+      "y": 410,
+      "label": "Permisos efectivos + datos de perfil",
+      "variant": "return"
+    },
+    {
+      "id": "msg-ready-perms",
+      "from": "servicio_permisos",
+      "to": "login_page",
+      "y": 440,
+      "label": "Permisos en memoria (Set<String>)",
+      "variant": "return"
+    },
+    {
+      "id": "msg-navigate",
+      "from": "login_page",
+      "to": "usuario",
+      "y": 470,
+      "label": "Navega a NavegacionPrincipalPage",
+      "variant": "default"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "login_page",
+      "from": 165,
+      "to": 480,
+      "type": "frontend"
+    },
+    {
+      "participant": "supabase_auth",
+      "from": 195,
+      "to": 290,
+      "type": "security"
+    },
+    {
+      "participant": "postgres_db",
+      "from": 225,
+      "to": 260,
+      "type": "database"
+    },
+    {
+      "participant": "servicio_permisos",
+      "from": 320,
+      "to": 445,
+      "type": "frontend"
+    },
+    {
+      "participant": "supabase_api",
+      "from": 350,
+      "to": 395,
+      "type": "backend"
+    },
+    {
+      "participant": "postgres_db",
+      "from": 380,
+      "to": 415,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Autenticación GoTrue",
+      "items": [
+        "El cliente envía credenciales institucionales mediante el SDK oficial de Supabase.",
+        "GoTrue valida la contraseña contra auth.users y emite un JWT firmado."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Permisos RBAC en PostgreSQL",
+      "items": [
+        "La función RPC obtener_mis_permisos() corre con SECURITY DEFINER.",
+        "Resuelve excepciones (DENEGAR/PERMITIR) y roles_permisos consolidados."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Seguridad en Memoria y UI",
+      "items": [
+        "ServicioPermisos almacena los códigos en memoria para evaluación O(1).",
+        "WidgetAutorizado controla la visibilidad de componentes en la vista."
+      ]
+    }
+  ]
+}

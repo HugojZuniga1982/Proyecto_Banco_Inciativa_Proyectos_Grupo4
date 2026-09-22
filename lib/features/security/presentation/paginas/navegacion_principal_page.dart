@@ -8,6 +8,7 @@ import '../../../../models/proyecto.dart';
 import '../../../auth/presentation/login_page.dart';
 import 'administracion_roles_page.dart';
 import 'gestion_usuarios_page.dart';
+import 'package:proyecto_programacion_movil_grupo_4/features/proyectos/presentation/paginas/reportes_page.dart';
 
 class NavegacionPrincipalPage extends StatefulWidget {
   const NavegacionPrincipalPage({super.key});
@@ -29,37 +30,39 @@ class _NavegacionPrincipalPageState extends State<NavegacionPrincipalPage> {
   }
 
   Widget _buildActiveBody() {
-    switch (_activeTab) {
-      case 'dashboard':
-        return DashboardGerencialPage(
-          isEmbedded: true,
-          onNavigate: _onNavigate,
-        );
-      case 'registro':
-        return FichaProyectoPage(
-          isEmbedded: true,
-          proyectoAEditar: _proyectoAEditar,
-          onNavigate: _onNavigate,
-        );
-      case 'proyectos':
-        return BandejaProyectosPage(
-          isEmbedded: true,
-          onNavigate: _onNavigate,
-        );
-      case 'usuarios':
-        return GestionUsuariosPage(
-          isEmbedded: true,
-          onNavigate: _onNavigate,
-        );
-      case 'roles':
-        return AdministracionRolesPage(
-          isEmbedded: true,
-          onNavigate: _onNavigate,
-        );
-      default:
-        return const Center(child: Text('Módulo no encontrado'));
-    }
+  switch (_activeTab) {
+    case 'dashboard':
+      return DashboardGerencialPage(
+        isEmbedded: true,
+        onNavigate: _onNavigate,
+      );
+    case 'reportes':
+      return const ReportesPage();
+    case 'registro':
+      return FichaProyectoPage(
+        isEmbedded: true,
+        proyectoAEditar: _proyectoAEditar,
+        onNavigate: _onNavigate,
+      );
+    case 'proyectos':
+      return BandejaProyectosPage(
+        isEmbedded: true,
+        onNavigate: _onNavigate,
+      );
+    case 'usuarios':
+      return GestionUsuariosPage(
+        isEmbedded: true,
+        onNavigate: _onNavigate,
+      );
+    case 'roles':
+      return AdministracionRolesPage(
+        isEmbedded: true,
+        onNavigate: _onNavigate,
+      );
+    default:
+      return const Center(child: Text('Módulo no encontrado'));
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +240,12 @@ class _NavegacionPrincipalPageState extends State<NavegacionPrincipalPage> {
                   label: 'Dashboard',
                   tabId: 'dashboard',
                 ),
+                if (permisos.tiene('preinversion.dashboard.consultar'))
+                _buildSidebarItem(
+                icon: Icons.bar_chart_outlined,
+                label: 'Reportes',
+                 tabId: 'reportes',
+                 ),
               _buildSidebarItem(
                 icon: Icons.edit_document,
                 label: 'Registro de Ficha',

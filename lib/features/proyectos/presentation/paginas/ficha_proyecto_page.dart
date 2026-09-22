@@ -43,7 +43,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
 
   // Controllers Step 2
   final _costoTotalCtrl = TextEditingController();
-  String? _periodoEjecucionSeleccionado = '12 meses';
+  String? _periodoEjecucionSeleccionado;
   final _coordenadasUtmCtrl = TextEditingController();
   final _aspectosTecnicosCtrl = TextEditingController();
   final _entregablePrincipalCtrl = TextEditingController();
@@ -59,7 +59,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
 
   // Tipología y Estado (Stitch specification)
   String _tipoIniciativa = 'Proyecto';
-  final _vidaUtilCtrl = TextEditingController(text: '20');
+  final _vidaUtilCtrl = TextEditingController();
 
   // Controllers Step 3 (Componentes y Estudios dinámicos)
   final List<ComponenteProyecto> _componentes = [];
@@ -337,46 +337,92 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
     });
   }
 
+  Map<String, double> _calcularProgresoFases() {
+    // Si la ficha está completamente nueva y sin registrar datos, inicia en 0%
+    final bool esFichaNueva = widget.proyectoAEditar == null;
+    if (esFichaNueva &&
+        _nombreCtrl.text.trim().isEmpty &&
+        _costoTotalCtrl.text.trim().isEmpty &&
+        _objetivoGeneralCtrl.text.trim().isEmpty &&
+        _descripcionProblemaCtrl.text.trim().isEmpty &&
+        _componentes.isEmpty &&
+        _estudios.isEmpty) {
+      return {'f1': 0.0, 'f2': 0.0, 'f3': 0.0, 'f4': 0.0, 'total': 0.0};
+    }
+
+    // FASE 1: Identificación y Tipología (25% del total)
+    // 9 campos evaluados
+    int f1Total = 9;
+    int f1Llenos = 0;
+    if (_nombreCtrl.text.trim().isNotEmpty) f1Llenos++;
+    if (_institucionSeleccionadaId != null) f1Llenos++;
+    if (_sectorSeleccionadoId != null) f1Llenos++;
+    if (_subsectorSeleccionadoId != null) f1Llenos++;
+    if (_nivelPreinversionSeleccionadoId != null) f1Llenos++;
+    if (_vidaUtilCtrl.text.trim().isNotEmpty) f1Llenos++;
+    if (_periodoEjecucionSeleccionado != null) f1Llenos++;
+    if (_objetivoGeneralCtrl.text.trim().isNotEmpty) f1Llenos++;
+    if (_descripcionProblemaCtrl.text.trim().isNotEmpty) f1Llenos++;
+    final double pctF1 = (f1Llenos / f1Total) * 25.0;
+
+    // FASE 2: Financiamiento y Localización (25% del total)
+    // 12 campos evaluados
+    int f2Total = 12;
+    int f2Llenos = 0;
+    if (_costoTotalCtrl.text.trim().isNotEmpty) f2Llenos++;
+    if (_departamentoSeleccionadoId != null) f2Llenos++;
+    if (_municipioSeleccionadoId != null) f2Llenos++;
+    if (_coordenadasUtmCtrl.text.trim().isNotEmpty) f2Llenos++;
+    if (_entregablePrincipalCtrl.text.trim().isNotEmpty) f2Llenos++;
+    if (_finalidadIntervencionCtrl.text.trim().isNotEmpty) f2Llenos++;
+    if (_porcentajeInversionRealCtrl.text.trim().isNotEmpty) f2Llenos++;
+    if (_porcentajeDesarrolloHumanoCtrl.text.trim().isNotEmpty) f2Llenos++;
+    if (_costoAnualOperacionCtrl.text.trim().isNotEmpty) f2Llenos++;
+    if (_entidadResponsableOperacionCtrl.text.trim().isNotEmpty) f2Llenos++;
+    if (_posibleFuenteFinanciamientoSeleccionadoId != null) f2Llenos++;
+    if (_aspectosTecnicosCtrl.text.trim().isNotEmpty) f2Llenos++;
+    final double pctF2 = (f2Llenos / f2Total) * 25.0;
+
+    // FASE 3: Componentes y Presupuesto/Estudios (25% del total)
+    final totalProyecto = double.tryParse(_costoTotalCtrl.text.trim()) ?? 0.0;
+    final totalComp = _componentes.fold(0.0, (sum, c) => sum + c.costo);
+    final bool componentesCuadran = totalProyecto > 0 && _componentes.isNotEmpty && (totalComp - totalProyecto).abs() <= 0.01;
+
+    int f3Total = 2;
+    int f3Llenos = 0;
+    if (_componentes.isNotEmpty) f3Llenos++;
+    if (_estudios.isNotEmpty || componentesCuadran) f3Llenos++;
+    final double pctF3 = (f3Llenos / f3Total) * 25.0;
+
+    // FASE 4: Evaluación y Beneficiarios (25% del total)
+    // 9 campos evaluados
+    int f4Total = 9;
+    int f4Llenos = 0;
+    if (_evalCaeCtrl.text.trim().isNotEmpty) f4Llenos++;
+    if (_evalCostoEficienciaCtrl.text.trim().isNotEmpty) f4Llenos++;
+    if (_evalVpnCtrl.text.trim().isNotEmpty) f4Llenos++;
+    if (_evalBeneficioCostoCtrl.text.trim().isNotEmpty) f4Llenos++;
+    if (_evalTirCtrl.text.trim().isNotEmpty) f4Llenos++;
+    if (_beneficiariosDirectosCtrl.text.trim().isNotEmpty) f4Llenos++;
+    if (_beneficiariosIndirectosCtrl.text.trim().isNotEmpty) f4Llenos++;
+    if (_empleosDirectosCtrl.text.trim().isNotEmpty) f4Llenos++;
+    if (_empleosIndirectosCtrl.text.trim().isNotEmpty) f4Llenos++;
+    final double pctF4 = (f4Llenos / f4Total) * 25.0;
+
+    double total = pctF1 + pctF2 + pctF3 + pctF4;
+    if (total > 100.0) total = 100.0;
+
+    return {
+      'f1': pctF1,
+      'f2': pctF2,
+      'f3': pctF3,
+      'f4': pctF4,
+      'total': total,
+    };
+  }
+
   double _calcularCompletitud() {
-    int totalCampos = 32;
-    int camposLlenos = 0;
-
-    if (_nombreCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_institucionSeleccionadaId != null) camposLlenos++;
-    camposLlenos++; // Coejecutora is always counted (either specific institution selected or defaults to "No aplica")
-    if (_sectorSeleccionadoId != null) camposLlenos++;
-    if (_subsectorSeleccionadoId != null) camposLlenos++;
-    if (_objetivoGeneralCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_descripcionProblemaCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_costoTotalCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_periodoEjecucionSeleccionado != null) camposLlenos++;
-    if (_departamentoSeleccionadoId != null) camposLlenos++;
-    if (_municipioSeleccionadoId != null) camposLlenos++;
-    if (_coordenadasUtmCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_entregablePrincipalCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_finalidadIntervencionCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_porcentajeInversionRealCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_porcentajeDesarrolloHumanoCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_costoAnualOperacionCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_entidadResponsableOperacionCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_nivelPreinversionSeleccionadoId != null) camposLlenos++;
-    if (_posibleFuenteFinanciamientoSeleccionadoId != null) camposLlenos++;
-    if (_aspectosTecnicosCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_vidaUtilCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_componentes.isNotEmpty) camposLlenos++;
-    if (_estudios.isNotEmpty) camposLlenos++;
-    if (_evalCaeCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_evalCostoEficienciaCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_evalVpnCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_evalBeneficioCostoCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_evalTirCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_beneficiariosDirectosCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_beneficiariosIndirectosCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_empleosDirectosCtrl.text.trim().isNotEmpty) camposLlenos++;
-    if (_empleosIndirectosCtrl.text.trim().isNotEmpty) camposLlenos++;
-
-    final double pct = (camposLlenos / totalCampos) * 100;
-    return pct > 100.0 ? 100.0 : pct;
+    return _calcularProgresoFases()['total'] ?? 0.0;
   }
 
   Future<void> _guardarProyecto() async {
@@ -648,6 +694,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
                       label: 'Vida Útil (Años) *',
                       controller: _vidaUtilCtrl,
                       keyboardType: TextInputType.number,
+                      hintText: 'Ej: 20',
                       validator: (v) => v!.isEmpty ? 'Campo obligatorio' : null,
                     ),
                     _buildPeriodoEjecucionDropdown(),
@@ -1086,6 +1133,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
         labelText: 'Meses de Ejecución *',
         border: OutlineInputBorder(),
       ),
+      hint: const Text('Seleccione periodo (Ej: 12 meses)'),
       items: _periodosMeses.map((p) {
         return DropdownMenuItem<String>(
           value: p,
@@ -1132,6 +1180,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
     int? maxLength,
+    String? hintText,
   }) {
     if (maxLength == null) {
       return TextFormField(
@@ -1141,6 +1190,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
         validator: validator,
         decoration: InputDecoration(
           labelText: label,
+          hintText: hintText,
           border: const OutlineInputBorder(),
           alignLabelWithHint: true,
         ),
@@ -1185,6 +1235,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
           buildCounter: (context, {required currentLength, required isFocused, required maxLength}) => null,
           decoration: InputDecoration(
             labelText: label,
+            hintText: hintText,
             border: const OutlineInputBorder(),
             alignLabelWithHint: true,
           ),
@@ -1368,6 +1419,7 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
 
   Widget _buildSummaryCard() {
     final double completitud = _calcularCompletitud();
+    final progreso = _calcularProgresoFases();
     final isNew = widget.proyectoAEditar == null;
 
     return Card(
@@ -1443,10 +1495,66 @@ class _FichaProyectoPageState extends State<FichaProyectoPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: completitud / 100,
+                value: (completitud / 100).clamp(0.0, 1.0),
                 minHeight: 8,
                 backgroundColor: Colors.grey.shade200,
                 valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF24389C)),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                _buildFaseMiniChip('Fase 1', progreso['f1'] ?? 0, 25),
+                const SizedBox(width: 4),
+                _buildFaseMiniChip('Fase 2', progreso['f2'] ?? 0, 25),
+                const SizedBox(width: 4),
+                _buildFaseMiniChip('Fase 3', progreso['f3'] ?? 0, 25),
+                const SizedBox(width: 4),
+                _buildFaseMiniChip('Fase 4', progreso['f4'] ?? 0, 25),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFaseMiniChip(String label, double valor, double maxValor) {
+    final bool completa = valor >= maxValor;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        decoration: BoxDecoration(
+          color: completa
+              ? const Color(0xFFEAF5EA)
+              : (valor > 0 ? const Color(0xFFE8F0FE) : Colors.grey.shade100),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: completa
+                ? const Color(0xFF2D6A4F).withValues(alpha: 0.3)
+                : (valor > 0 ? const Color(0xFF24389C).withValues(alpha: 0.2) : Colors.grey.shade300),
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: completa
+                    ? const Color(0xFF2D6A4F)
+                    : (valor > 0 ? const Color(0xFF24389C) : Colors.grey.shade600),
+              ),
+            ),
+            Text(
+              '${valor.toStringAsFixed(0)}%',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                color: completa
+                    ? const Color(0xFF2D6A4F)
+                    : (valor > 0 ? const Color(0xFF24389C) : Colors.grey.shade600),
               ),
             ),
           ],
