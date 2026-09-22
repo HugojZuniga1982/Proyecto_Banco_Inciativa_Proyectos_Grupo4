@@ -6,7 +6,7 @@ class UsuarioService {
   // 1. Obtener lista de usuarios con su institución y roles asignados
   Future<List<Map<String, dynamic>>> obtenerUsuariosConRoles() async {
     final respuesta = await _supabase.from('perfiles').select('''
-      id, institucion_id, nombres, apellidos, identidad, celular, cargo, estado,
+      id, institucion_id, nombres, apellidos, identidad, celular, cargo, estado, email,
       instituciones (id, codigo, nombre),
       usuarios_roles (
         rol_id,
@@ -96,6 +96,7 @@ class UsuarioService {
     required String cargo,
     required String institucionId,
     String? estado,
+    String? email,
   }) async {
     final datosActualizados = <String, dynamic>{
       'nombres': nombres,
@@ -109,6 +110,10 @@ class UsuarioService {
 
     if (estado != null) {
       datosActualizados['estado'] = estado;
+    }
+
+    if (email != null && email.trim().isNotEmpty) {
+      datosActualizados['email'] = email.trim();
     }
 
     await _supabase.from('perfiles').update(datosActualizados).eq('id', id);
