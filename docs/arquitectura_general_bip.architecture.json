@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arquitectura General del Sistema BIP Web",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "viewBox": [1020, 480],
+    "views": [
+      {
+        "id": "vista-cliente",
+        "label": "1. Capa Cliente Flutter",
+        "focus": ["navegador_usuario", "flutter_ui", "servicio_permisos", "widget_autorizado"],
+        "note": "Interfaz de usuario reactiva con evaluación de permisos RBAC en memoria."
+      },
+      {
+        "id": "vista-supabase",
+        "label": "2. Backend Supabase",
+        "focus": ["flutter_ui", "supabase_gotrue", "postgrest_api", "postgres_db"],
+        "note": "Servicios de autenticación y gateway REST/RPC con políticas de seguridad RLS."
+      },
+      {
+        "id": "vista-datos",
+        "label": "3. Persistencia y Auditoría",
+        "focus": ["postgrest_api", "procedimientos_rpc", "postgres_db", "bitacora_auditoria"],
+        "note": "Esquema relacional en PostgreSQL con funciones transaccionales y auditoría."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "navegador_usuario",
+      "type": "external",
+      "label": "Operador BIP",
+      "sublabel": "Navegador Web / PWA",
+      "pos": [40, 210],
+      "size": [130, 64]
+    },
+    {
+      "id": "flutter_ui",
+      "type": "frontend",
+      "label": "Módulos Flutter",
+      "sublabel": "Auth, Proyectos, Seguridad",
+      "pos": [280, 210],
+      "size": [150, 64],
+      "tag": "Material 3"
+    },
+    {
+      "id": "servicio_permisos",
+      "type": "frontend",
+      "label": "ServicioPermisos",
+      "sublabel": "Singleton en memoria",
+      "pos": [280, 70],
+      "size": [150, 64],
+      "tag": "Cache O(1)"
+    },
+    {
+      "id": "widget_autorizado",
+      "type": "frontend",
+      "label": "WidgetAutorizado",
+      "sublabel": "Renderizado condicional UI",
+      "pos": [280, 350],
+      "size": [150, 64]
+    },
+    {
+      "id": "supabase_gotrue",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "GoTrue / JWT Tokens",
+      "brand": "supabase",
+      "pos": [540, 70],
+      "size": [150, 64],
+      "tag": "Auth Service"
+    },
+    {
+      "id": "postgrest_api",
+      "type": "backend",
+      "label": "PostgREST API",
+      "sublabel": "Gateway REST & RPC",
+      "brand": "supabase",
+      "pos": [540, 210],
+      "size": [150, 64],
+      "tag": "Con RLS"
+    },
+    {
+      "id": "procedimientos_rpc",
+      "type": "backend",
+      "label": "Funciones RPC",
+      "sublabel": "obtener_mis_permisos, roles",
+      "pos": [800, 70],
+      "size": [160, 64],
+      "tag": "SECURITY DEFINER"
+    },
+    {
+      "id": "postgres_db",
+      "type": "database",
+      "label": "PostgreSQL DB",
+      "sublabel": "Esquema público relacional",
+      "brand": "postgresql",
+      "pos": [800, 210],
+      "size": [160, 64],
+      "tag": "Base de Datos"
+    },
+    {
+      "id": "bitacora_auditoria",
+      "type": "database",
+      "label": "Bitácora Auditoría",
+      "sublabel": "Trazabilidad transaccional",
+      "pos": [800, 350],
+      "size": [160, 64],
+      "tag": "JSONB Logs"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Frontend: Aplicación Flutter Web",
+      "wraps": ["flutter_ui", "servicio_permisos", "widget_autorizado"]
+    },
+    {
+      "kind": "region",
+      "label": "Backend: Supabase Cloud & PostgreSQL",
+      "wraps": ["supabase_gotrue", "postgrest_api", "postgres_db", "procedimientos_rpc", "bitacora_auditoria"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Seguridad en Base de Datos",
+      "wraps": ["postgres_db", "procedimientos_rpc", "bitacora_auditoria"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-to-ui",
+      "from": "navegador_usuario",
+      "to": "flutter_ui",
+      "label": "Acceso Web"
+    },
+    {
+      "id": "ui-to-perms",
+      "from": "flutter_ui",
+      "to": "servicio_permisos",
+      "label": "Consulta permisos",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDy": -15
+    },
+    {
+      "id": "ui-to-guard",
+      "from": "flutter_ui",
+      "to": "widget_autorizado",
+      "label": "Condiciona UI",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "auth-to-perms",
+      "from": "supabase_gotrue",
+      "to": "servicio_permisos",
+      "label": "Emite Session",
+      "fromSide": "left",
+      "toSide": "right",
+      "variant": "security"
+    },
+    {
+      "id": "ui-to-api",
+      "from": "flutter_ui",
+      "to": "postgrest_api",
+      "label": "Peticiones HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "auth-to-rpc",
+      "from": "supabase_gotrue",
+      "to": "procedimientos_rpc",
+      "label": "Identidad JWT",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "security"
+    },
+    {
+      "id": "api-to-rpc",
+      "from": "postgrest_api",
+      "to": "procedimientos_rpc",
+      "label": "Ejecuta RPC",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDy": -15
+    },
+    {
+      "id": "api-to-db",
+      "from": "postgrest_api",
+      "to": "postgres_db",
+      "label": "Consultas con RLS"
+    },
+    {
+      "id": "db-to-audit",
+      "from": "postgres_db",
+      "to": "bitacora_auditoria",
+      "label": "Historial JSONB",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Frontend Modular en Flutter",
+      "items": [
+        "Módulos desacoplados para seguridad, proyectos y catálogos.",
+        "ServicioPermisos evalúa privilegios en memoria de forma instantánea O(1).",
+        "WidgetAutorizado previene renderizar botones y opciones no permitidas."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Plataforma Supabase Backend",
+      "items": [
+        "GoTrue administra tokens JWT firmados y estado de autenticación.",
+        "PostgREST funciona como API Gateway validando el Bearer token.",
+        "Las políticas de Row Level Security (RLS) aíslan la información por institución."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Lógica en PostgreSQL",
+      "items": [
+        "Funciones RPC transaccionales ejecutan operaciones complejas con SECURITY DEFINER.",
+        "Triggers automáticos garantizan la sincronización de perfiles al registrarse.",
+        "Cada mutación de roles o proyectos se registra en bitacora_auditoria."
+      ]
+    }
+  ]
+}
