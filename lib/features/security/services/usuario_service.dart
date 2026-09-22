@@ -6,7 +6,7 @@ class UsuarioService {
   // 1. Obtener lista de usuarios con su institución y roles asignados
   Future<List<Map<String, dynamic>>> obtenerUsuariosConRoles() async {
     final respuesta = await _supabase.from('perfiles').select('''
-      id, nombres, apellidos, identidad, celular, cargo, estado,
+      id, institucion_id, nombres, apellidos, identidad, celular, cargo, estado,
       instituciones (id, codigo, nombre),
       usuarios_roles (
         rol_id,
@@ -84,5 +84,73 @@ class UsuarioService {
       'id_usuario': usuarioId,
       'ids_roles': rolesIds,
     });
+  }
+
+  // 5. Actualizar datos del perfil de un usuario
+  Future<void> actualizarUsuario({
+    required String id,
+    required String nombres,
+    required String apellidos,
+    required String identidad,
+    required String celular,
+    required String cargo,
+    required String institucionId,
+    String? estado,
+  }) async {
+    final datosActualizados = <String, dynamic>{
+      'nombres': nombres,
+      'apellidos': apellidos,
+      'identidad': identidad,
+      'celular': celular,
+      'cargo': cargo,
+      'institucion_id': institucionId,
+      'fecha_actualizacion': DateTime.now().toIso8601String(),
+    };
+
+    if (estado != null) {
+      datosActualizados['estado'] = estado;
+    }
+
+    await _supabase.from('perfiles').update(datosActualizados).eq('id', id);
+
+    // Registro de auditoría
+    try {
+      final userActualId = _supabase.auth.currentUser?.id;
+      if (userActualId != null) {
+        await _supabase.from('bitacora_auditoria').insert({
+          'usuario_id': userActualId,
+          'accion': 'MODIFICAR_USUARIO',
+          'tipo_entidad': 'PERFILES',
+          'entidad_id': id,
+          'valores_nuevos': datosActualizados,
+        });
+      }
+    } catch (_) {
+      // Continuar si la bitácora no tiene permisos
+    }
+  }
+
+  // 6. Cambiar estado de activación del usuario (ACTIVO / INACTIVO)
+  Future<void> cambiarEstadoUsuario(String id, String nuevoEstado) async {
+    await _supabase.from('perfiles').update({
+      'estado': nuevoEstado,
+      'fecha_actualizacion': DateTime.now().toIso8601String(),
+    }).eq('id', id);
+
+    // Registro de auditoría
+    try {
+      final userActualId = _supabase.auth.currentUser?.id;
+      if (userActualId != null) {
+        await _supabase.from('bitacora_auditoria').insert({
+          'usuario_id': userActualId,
+          'accion': 'CAMBIAR_ESTADO_USUARIO',
+          'tipo_entidad': 'PERFILES',
+          'entidad_id': id,
+          'valores_nuevos': {'estado': nuevoEstado},
+        });
+      }
+    } catch (_) {
+      // Continuar si la bitácora no tiene permisos
+    }
   }
 }
