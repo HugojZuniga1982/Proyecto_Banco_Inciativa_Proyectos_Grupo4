@@ -97,6 +97,17 @@ class Proyecto {
     this.estudios = const [],
   });
 
+  /// Identificador funcional BIP oficial (Ej. BIP-2026-6E26CD7B)
+  String get codigoBip {
+    final anio = fechaCreacion?.year ?? DateTime.now().year;
+    if (id != null && id!.isNotEmpty) {
+      final cleanId = id!.replaceAll('-', '').toUpperCase();
+      final shortId = cleanId.length >= 8 ? cleanId.substring(0, 8) : cleanId;
+      return 'BIP-$anio-$shortId';
+    }
+    return 'BIP-$anio-SINCÓDIGO';
+  }
+
   factory Proyecto.fromJson(Map<String, dynamic> json) {
     // Parse nested components
     var listComp = json['componentes_proyecto'] as List?;

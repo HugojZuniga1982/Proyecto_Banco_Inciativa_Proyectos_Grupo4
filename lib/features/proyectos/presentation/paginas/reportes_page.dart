@@ -155,11 +155,12 @@ class _ReportesPageState extends State<ReportesPage> {
 
   void _exportarCSV() {
     List<List<dynamic>> filas = [
-      ['Institución', 'Nombre del Proyecto', 'Fuente de Financiamiento', 'Inversión (Lps)', 'Estado'],
+      ['Código BIP', 'Institución', 'Nombre del Proyecto', 'Fuente de Financiamiento', 'Inversión (Lps)', 'Estado'],
     ];
 
     for (var p in _proyectosFiltrados) {
       filas.add([
+        p.codigoBip,
         p.institucionNombre ?? 'N/A',
         p.nombre,
         p.posibleFuenteFinanciamientoNombre ?? 'N/A',
@@ -209,7 +210,7 @@ class _ReportesPageState extends State<ReportesPage> {
           pw.Divider(color: PdfColors.indigo900, thickness: 1.5),
           pw.SizedBox(height: 10),
           pw.TableHelper.fromTextArray(
-            headers: ['No.', 'Institución', 'Nombre del Proyecto', 'Fuente Financ.', 'Inversión (Lps)', 'Estado'],
+            headers: ['No.', 'Código BIP', 'Institución', 'Nombre del Proyecto', 'Fuente Financ.', 'Inversión (Lps)', 'Estado'],
             headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8, color: PdfColors.white),
             headerDecoration: const pw.BoxDecoration(color: PdfColors.indigo900),
             cellStyle: const pw.TextStyle(fontSize: 8),
@@ -219,6 +220,7 @@ class _ReportesPageState extends State<ReportesPage> {
               final p = _proyectosFiltrados[i];
               return [
                 '${i + 1}',
+                p.codigoBip,
                 p.institucionNombre ?? 'N/A',
                 p.nombre,
                 p.posibleFuenteFinanciamientoNombre ?? 'N/A',
@@ -294,8 +296,8 @@ class _ReportesPageState extends State<ReportesPage> {
           ),
           pw.SizedBox(height: 12),
 
-          // Sección 1: Identificación y Localización
-          _buildPdfSectionHeader('1. IDENTIFICACIÓN Y LOCALIZACIÓN'),
+          // Sección 1: Datos Generales
+          _buildPdfSectionHeader('1. DATOS GENERALES DEL PROYECTO'),
           pw.SizedBox(height: 6),
           pw.TableHelper.fromTextArray(
             border: pw.TableBorder.all(color: PdfColors.grey300),
@@ -303,6 +305,7 @@ class _ReportesPageState extends State<ReportesPage> {
             cellPadding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             cellStyle: const pw.TextStyle(fontSize: 8),
             data: [
+              ['Código BIP Oficial:', p.codigoBip, 'Fecha Emisión:', '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'],
               ['Institución Formuladora:', p.institucionNombre ?? 'N/A', 'Institución Coejecutora:', p.institucionCoejecutoraNombre ?? 'No aplica'],
               ['Sector de Inversión:', p.subsectorNombre ?? 'N/A', 'Etapa a Financiar:', p.nivelPreinversionNombre ?? 'N/A'],
               ['Departamento:', p.departamentoNombre ?? 'N/A', 'Municipio:', p.municipioNombre ?? 'N/A'],
@@ -550,7 +553,7 @@ class _ReportesPageState extends State<ReportesPage> {
 
             content.add(
               pw.TableHelper.fromTextArray(
-                headers: ['No.', 'Nombre de la Iniciativa de Inversión', 'Sector / Subsector', 'Fuente Financ.', 'Inversión (Lps)', 'Estado Proceso'],
+                headers: ['No.', 'Código BIP', 'Nombre de la Iniciativa de Inversión', 'Sector / Subsector', 'Fuente Financ.', 'Inversión (Lps)', 'Estado Proceso'],
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 7, color: PdfColors.white),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.indigo900),
                 border: pw.TableBorder.all(color: PdfColors.grey300),
@@ -561,6 +564,7 @@ class _ReportesPageState extends State<ReportesPage> {
                   final p = listaProyectos[idx];
                   return [
                     '${idx + 1}',
+                    p.codigoBip,
                     p.nombre,
                     p.subsectorNombre ?? 'N/A',
                     p.posibleFuenteFinanciamientoNombre ?? 'Fondos Nacionales',
@@ -853,6 +857,7 @@ class _ReportesPageState extends State<ReportesPage> {
                               child: DataTable(
                                 headingRowColor: WidgetStateProperty.all(const Color(0xFFECEEF1)),
                                 columns: const [
+                                  DataColumn(label: Text('Código BIP', style: TextStyle(fontWeight: FontWeight.bold))),
                                   DataColumn(label: Text('Institución', style: TextStyle(fontWeight: FontWeight.bold))),
                                   DataColumn(label: Text('Nombre del Proyecto', style: TextStyle(fontWeight: FontWeight.bold))),
                                   DataColumn(label: Text('Inversión (Lps)', style: TextStyle(fontWeight: FontWeight.bold))),
@@ -869,6 +874,24 @@ class _ReportesPageState extends State<ReportesPage> {
                                       });
                                     },
                                     cells: [
+                                      DataCell(
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF24389C).withValues(alpha: 0.08),
+                                            borderRadius: BorderRadius.circular(4),
+                                            border: Border.all(color: const Color(0xFF24389C).withValues(alpha: 0.2)),
+                                          ),
+                                          child: Text(
+                                            p.codigoBip,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 11,
+                                              color: Color(0xFF24389C),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                       DataCell(
                                         SizedBox(
                                           width: 170,
