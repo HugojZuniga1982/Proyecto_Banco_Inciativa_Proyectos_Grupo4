@@ -355,6 +355,19 @@ class _DetalleProyectoPageState extends State<DetalleProyectoPage> {
               ],
             ),
             const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+              ),
+              child: Text(
+                'Código BIP: ${widget.proyecto.codigoBip}',
+                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+              ),
+            ),
+            const SizedBox(height: 8),
             Text(
               widget.proyecto.nombre,
               style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
@@ -378,6 +391,7 @@ class _DetalleProyectoPageState extends State<DetalleProyectoPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionTitle('1. Identificación e Información General'),
+            _buildDetailRow('Código BIP Oficial', widget.proyecto.codigoBip),
             _buildDetailRow('Objetivo General', widget.proyecto.objetivoGeneral, isMultiline: true),
             _buildDetailRow('Problema / Necesidad', widget.proyecto.descripcionProblema, isMultiline: true),
             const Divider(),

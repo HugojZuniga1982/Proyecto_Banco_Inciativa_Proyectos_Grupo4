@@ -68,7 +68,8 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
           final nombre = p.nombre.toLowerCase();
           final inst = p.institucionNombre?.toLowerCase() ?? '';
           final sub = p.subsectorNombre?.toLowerCase() ?? '';
-          return nombre.contains(q) || inst.contains(q) || sub.contains(q);
+          final cod = p.codigoBip.toLowerCase();
+          return nombre.contains(q) || inst.contains(q) || sub.contains(q) || cod.contains(q);
         }).toList();
       }
     });
@@ -242,7 +243,7 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
             child: DataTable(
               headingRowColor: WidgetStateProperty.all(const Color(0xFFECEEF1)),
               columns: const [
-                DataColumn(label: Text('Código / Sector', style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(label: Text('Código BIP / Sector', style: TextStyle(fontWeight: FontWeight.bold))),
                 DataColumn(label: Text('Nombre de Proyecto', style: TextStyle(fontWeight: FontWeight.bold))),
                 DataColumn(label: Text('Institución Ejecutora', style: TextStyle(fontWeight: FontWeight.bold))),
                 DataColumn(label: Text('Costo Total (Lps)', style: TextStyle(fontWeight: FontWeight.bold))),
@@ -253,7 +254,36 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
               rows: _filtrados.map((p) {
                 return DataRow(
                   cells: [
-                    DataCell(Text(p.subsectorNombre ?? 'N/A')),
+                    DataCell(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF24389C).withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: const Color(0xFF24389C).withValues(alpha: 0.25)),
+                            ),
+                            child: Text(
+                              p.codigoBip,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: Color(0xFF24389C),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            p.subsectorNombre ?? 'N/A',
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
                     DataCell(
                       SizedBox(
                         width: 250,
@@ -375,9 +405,27 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      p.subsectorNombre ?? 'N/A',
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF24389C), fontWeight: FontWeight.bold),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF24389C).withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: const Color(0xFF24389C).withValues(alpha: 0.2)),
+                          ),
+                          child: Text(
+                            p.codigoBip,
+                            style: const TextStyle(fontSize: 10, color: Color(0xFF24389C), fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          p.subsectorNombre ?? 'N/A',
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                      ],
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
