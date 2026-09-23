@@ -5,8 +5,7 @@ import 'package:proyecto_programacion_movil_grupo_4/features/security/services/u
 import 'package:proyecto_programacion_movil_grupo_4/features/catalogs/services/catalogos_service.dart';
 import 'package:proyecto_programacion_movil_grupo_4/core/utils/formatters.dart';
 import 'dart:convert';
-// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
-import 'dart:html' as html;
+import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -153,7 +152,7 @@ class _ReportesPageState extends State<ReportesPage> {
     );
   }
 
-  void _exportarCSV() {
+  Future<void> _exportarCSV() async {
     List<List<dynamic>> filas = [
       ['Código BIP', 'Institución', 'Nombre del Proyecto', 'Fuente de Financiamiento', 'Inversión (Lps)', 'Estado'],
     ];
@@ -171,16 +170,16 @@ class _ReportesPageState extends State<ReportesPage> {
 
     String csvData = csv.encode(filas);
     final bytes = utf8.encode(csvData);
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    html.AnchorElement(href: url)
-      ..setAttribute('download', 'reporte_proyectos.csv')
-      ..click();
-    html.Url.revokeObjectUrl(url);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Reporte CSV descargado correctamente.')),
+    await Printing.sharePdf(
+      bytes: Uint8List.fromList(bytes),
+      filename: 'reporte_proyectos.csv',
     );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reporte CSV generado correctamente.')),
+      );
+    }
   }
 
   // 1. Reporte Listado Tabular
