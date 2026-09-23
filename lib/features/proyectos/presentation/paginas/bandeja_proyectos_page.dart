@@ -143,52 +143,96 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
 
   Widget _buildBody(BuildContext context, bool isDesktop) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.all(isDesktop ? 24.0 : 12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.isEmbedded) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Bandeja de Proyectos',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF191C1E),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Gestión y monitoreo de iniciativas de inversión pública (BIP)',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Actualizar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF24389C),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+            if (isDesktop)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Bandeja de Proyectos',
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF191C1E),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Gestión y monitoreo de iniciativas de inversión pública (BIP)',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  onPressed: _cargarProyectos,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Actualizar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF24389C),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: _cargarProyectos,
+                  ),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Bandeja de Proyectos',
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF191C1E),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Iniciativas BIP',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton.filled(
+                    icon: const Icon(Icons.refresh, size: 20),
+                    style: IconButton.styleFrom(
+                      backgroundColor: const Color(0xFF24389C),
+                      foregroundColor: Colors.white,
+                    ),
+                    tooltip: 'Actualizar',
+                    onPressed: _cargarProyectos,
+                  ),
+                ],
+              ),
+            SizedBox(height: isDesktop ? 24 : 12),
           ],
 
           // Search Box Card
@@ -398,35 +442,41 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF24389C).withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: const Color(0xFF24389C).withValues(alpha: 0.2)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF24389C).withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: const Color(0xFF24389C).withValues(alpha: 0.2)),
+                            ),
+                            child: Text(
+                              p.codigoBip,
+                              style: const TextStyle(fontSize: 10, color: Color(0xFF24389C), fontWeight: FontWeight.bold),
+                            ),
                           ),
-                          child: Text(
-                            p.codigoBip,
-                            style: const TextStyle(fontSize: 10, color: Color(0xFF24389C), fontWeight: FontWeight.bold),
+                          const SizedBox(height: 2),
+                          Text(
+                            p.subsectorNombre ?? 'N/A',
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          p.subsectorNombre ?? 'N/A',
-                          style: const TextStyle(fontSize: 11, color: Colors.grey),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
@@ -466,21 +516,64 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
                 const SizedBox(height: 6),
                 Text(
                   p.nombre,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
-                Text('Institución: ${p.institucionNombre ?? "N/A"}'),
-                const SizedBox(height: 4),
-                Text('Costo: Lps ${Formatters.formatearLempiras(p.costoTotal)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text('Periodo: ${p.periodoEjecucion}'),
-                const Divider(),
+                const SizedBox(height: 6),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.business_outlined, size: 14, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        p.institucionNombre ?? 'N/A',
+                        style: const TextStyle(fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.attach_money, size: 14, color: Colors.teal),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        'Costo: Lps ${Formatters.formatearLempiras(p.costoTotal)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.teal),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        'Periodo: ${p.periodoEjecucion}',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 16),
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 4,
+                  runSpacing: 4,
                   children: [
                     TextButton.icon(
-                      icon: const Icon(Icons.visibility, size: 18),
-                      label: const Text('Ver'),
+                      icon: const Icon(Icons.visibility, size: 16),
+                      label: const Text('Ver', style: TextStyle(fontSize: 12)),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        visualDensity: VisualDensity.compact,
+                      ),
                       onPressed: () async {
                         await Navigator.push(
                           context,
@@ -491,10 +584,13 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
                         }
                       },
                     ),
-                    const SizedBox(width: 8),
                     TextButton.icon(
-                      icon: const Icon(Icons.edit, size: 18, color: Colors.orange),
-                      label: const Text('Editar', style: TextStyle(color: Colors.orange)),
+                      icon: const Icon(Icons.edit, size: 16, color: Colors.orange),
+                      label: const Text('Editar', style: TextStyle(color: Colors.orange, fontSize: 12)),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        visualDensity: VisualDensity.compact,
+                      ),
                       onPressed: () async {
                         if (widget.isEmbedded) {
                           widget.onNavigate?.call('registro', p);
@@ -507,9 +603,10 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
                         }
                       },
                     ),
-                    const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red, size: 18),
+                      icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                      tooltip: 'Eliminar Ficha',
+                      visualDensity: VisualDensity.compact,
                       onPressed: () => _eliminarProyecto(p),
                     ),
                   ],

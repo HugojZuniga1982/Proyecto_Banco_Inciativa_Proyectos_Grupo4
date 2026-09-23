@@ -106,61 +106,102 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
 
   Widget _buildBody(bool isDesktop) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.all(isDesktop ? 24.0 : 12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Embedded header title matching Stitch specs
           if (widget.isEmbedded) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Dashboard Gerencial',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF191C1E),
+            if (isDesktop)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Dashboard Gerencial',
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF191C1E),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Indicadores ejecutivos y resumen de inversiones',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14,
-                          color: Colors.grey,
+                        SizedBox(height: 4),
+                        Text(
+                          'Indicadores ejecutivos y resumen de inversiones',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Actualizar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF24389C),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      ],
                     ),
                   ),
-                  onPressed: _cargarMetricas,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Actualizar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF24389C),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: _cargarMetricas,
+                  ),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Dashboard Gerencial',
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF191C1E),
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Indicadores ejecutivos',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton.filled(
+                    icon: const Icon(Icons.refresh, size: 20),
+                    style: IconButton.styleFrom(
+                      backgroundColor: const Color(0xFF24389C),
+                      foregroundColor: Colors.white,
+                    ),
+                    tooltip: 'Actualizar',
+                    onPressed: _cargarMetricas,
+                  ),
+                ],
+              ),
+            SizedBox(height: isDesktop ? 24 : 12),
           ],
 
           // KPI Cards
           _buildKpiSection(isDesktop),
-          const SizedBox(height: 24),
+          SizedBox(height: isDesktop ? 24 : 12),
 
           // Charts/Distributions
           isDesktop
@@ -171,16 +212,16 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
                     const SizedBox(width: 16),
                     Expanded(child: _buildInversionPorSectorCard()),
                     const SizedBox(width: 16),
-                    Expanded(child: _buildEstadoGeneralCard()),
+                    Expanded(child: _buildEstadoGeneralCard(isDesktop)),
                   ],
                 )
               : Column(
                   children: [
                     _buildProyectosPorSectorCard(),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _buildInversionPorSectorCard(),
-                    const SizedBox(height: 16),
-                    _buildEstadoGeneralCard(),
+                    const SizedBox(height: 12),
+                    _buildEstadoGeneralCard(isDesktop),
                   ],
                 ),
         ],
@@ -190,28 +231,28 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
 
   Widget _buildKpiSection(bool isDesktop) {
     final children = [
-    _buildKpiCard(
-      title: 'Total Proyectos Registrados',
-      value: '$_totalProyectos',
-      subtitle: 'Fichas BIP activas en el sistema',
-      icon: Icons.assignment_outlined,
-      color: Colors.indigo,
-    ),
-    _buildKpiCard(
-      title: 'Inversión Acumulada Planeada',
-      value: 'Lps ${Formatters.formatearLempiras(_costoAcumulado)}',
-      subtitle: 'Presupuesto total estimado',
-      icon: Icons.monetization_on_outlined,
-      color: Colors.teal,
-    ),
-    _buildKpiCard(
-      title: 'Tasa de Aprobación',
-      value: '${(_tasaAprobacion * 100).toStringAsFixed(0)}%',
-      subtitle: 'Proyectos aprobados sobre el total',
-      icon: Icons.check_circle_outline,
-      color: Colors.green,
-    ),
-  ];
+      _buildKpiCard(
+        title: 'Total Proyectos Registrados',
+        value: '$_totalProyectos',
+        subtitle: 'Fichas BIP activas en el sistema',
+        icon: Icons.assignment_outlined,
+        color: Colors.indigo,
+      ),
+      _buildKpiCard(
+        title: 'Inversión Acumulada Planeada',
+        value: 'Lps ${Formatters.formatearLempiras(_costoAcumulado)}',
+        subtitle: 'Presupuesto total estimado',
+        icon: Icons.monetization_on_outlined,
+        color: Colors.teal,
+      ),
+      _buildKpiCard(
+        title: 'Tasa de Aprobación',
+        value: '${(_tasaAprobacion * 100).toStringAsFixed(0)}%',
+        subtitle: 'Proyectos aprobados sobre el total',
+        icon: Icons.check_circle_outline,
+        color: Colors.green,
+      ),
+    ];
 
     if (isDesktop) {
       return Row(
@@ -228,7 +269,7 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
       return Column(
         children: children
             .map((card) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(bottom: 10),
                   child: card,
                 ))
             .toList(),
@@ -249,24 +290,28 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
       ),
       elevation: 1,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             CircleAvatar(
-              radius: 30,
+              radius: 26,
               backgroundColor: color.withValues(alpha: 0.1),
-              child: Icon(icon, size: 30, color: color),
+              child: Icon(icon, size: 26, color: color),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w600)),
+                  Text(title, style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 4),
-                  Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)),
                 ],
               ),
             ),
@@ -277,76 +322,78 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
   }
 
   Widget _buildProyectosPorSectorCard() {
-  final sectores = _proyectosPorSector.keys.toList();
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    elevation: 1,
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Distribución de Proyectos por Sector',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF24389C)),
-          ),
-          const SizedBox(height: 16),
-          if (_proyectosPorSector.isEmpty)
-            const Center(child: Text('No hay proyectos registrados aún.', style: TextStyle(color: Colors.grey)))
-          else
-            SizedBox(
-              height: 220,
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: _proyectosPorSector.values.reduce((a, b) => a > b ? a : b).toDouble() + 1,
-                  barGroups: List.generate(sectores.length, (index) {
-                    final valor = _proyectosPorSector[sectores[index]]!;
-                    return BarChartGroupData(
-                      x: index,
-                      barRods: [
-                        BarChartRodData(
-                          toY: valor.toDouble(),
-                          color: const Color(0xFF24389C),
-                          width: 22,
-                          borderRadius: BorderRadius.circular(4),
+    final sectores = _proyectosPorSector.keys.toList();
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Distribución de Proyectos por Sector',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF24389C)),
+            ),
+            const SizedBox(height: 16),
+            if (_proyectosPorSector.isEmpty)
+              const Center(child: Text('No hay proyectos registrados aún.', style: TextStyle(color: Colors.grey)))
+            else
+              SizedBox(
+                height: 220,
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    maxY: _proyectosPorSector.values.reduce((a, b) => a > b ? a : b).toDouble() + 1,
+                    barGroups: List.generate(sectores.length, (index) {
+                      final valor = _proyectosPorSector[sectores[index]]!;
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: valor.toDouble(),
+                            color: const Color(0xFF24389C),
+                            width: sectores.length > 5 ? 14 : 22,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ],
+                      );
+                    }),
+                    titlesData: FlTitlesData(
+                      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            final index = value.toInt();
+                            if (index < 0 || index >= sectores.length) return const SizedBox();
+                            final nombre = sectores[index];
+                            final label = nombre.length > 8 ? '${nombre.substring(0, 6)}..' : nombre;
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                label,
+                                style: const TextStyle(fontSize: 9),
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    );
-                  }),
-                  titlesData: FlTitlesData(
-                    leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          final index = value.toInt();
-                          if (index < 0 || index >= sectores.length) return const SizedBox();
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              sectores[index],
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                          );
-                        },
                       ),
                     ),
+                    gridData: const FlGridData(show: false),
+                    borderData: FlBorderData(show: false),
                   ),
-                  gridData: const FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildInversionPorSectorCard() {
     return Card(
@@ -355,7 +402,7 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
       ),
       elevation: 1,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -377,8 +424,19 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(child: Text(entry.key, style: const TextStyle(fontWeight: FontWeight.w500))),
-                          Text('Lps ${Formatters.formatearLempiras(entry.value)} (${(pct * 100).toStringAsFixed(1)}%)', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Expanded(
+                            child: Text(
+                              entry.key,
+                              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Lps ${Formatters.formatearLempiras(entry.value)} (${(pct * 100).toStringAsFixed(1)}%)',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -396,7 +454,8 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
       ),
     );
   }
-    Widget _buildEstadoGeneralCard() {
+
+  Widget _buildEstadoGeneralCard(bool isDesktop) {
     final estados = _proyectosPorEstado.keys.toList();
     final coloresPorEstado = {
       'INGRESADO': Colors.blueGrey,
@@ -406,13 +465,72 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
       'RECHAZADO': Colors.red,
     };
 
+    final chartWidget = SizedBox(
+      height: 150,
+      width: 150,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          PieChart(
+            PieChartData(
+              sectionsSpace: 2,
+              centerSpaceRadius: 40,
+              sections: estados.map((estado) {
+                final valor = _proyectosPorEstado[estado]!;
+                return PieChartSectionData(
+                  value: valor.toDouble(),
+                  color: coloresPorEstado[estado] ?? Colors.grey,
+                  radius: 28,
+                  showTitle: false,
+                );
+              }).toList(),
+            ),
+          ),
+          Text(
+            '$_totalProyectos\nTotal',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+
+    final legendWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: estados.map((estado) {
+        final valor = _proyectosPorEstado[estado]!;
+        final pct = _totalProyectos > 0 ? (valor / _totalProyectos * 100) : 0.0;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              CircleAvatar(radius: 5, backgroundColor: coloresPorEstado[estado] ?? Colors.grey),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  estado,
+                  style: const TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${pct.toStringAsFixed(0)}%',
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       elevation: 1,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -427,61 +545,20 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
             const SizedBox(height: 16),
             if (_proyectosPorEstado.isEmpty)
               const Center(child: Text('No hay datos de estado disponibles.', style: TextStyle(color: Colors.grey)))
-            else
+            else if (isDesktop)
               Row(
                 children: [
-                  SizedBox(
-                    height: 160,
-                    width: 160,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        PieChart(
-                          PieChartData(
-                            sectionsSpace: 2,
-                            centerSpaceRadius: 45,
-                            sections: estados.map((estado) {
-                              final valor = _proyectosPorEstado[estado]!;
-                              return PieChartSectionData(
-                                value: valor.toDouble(),
-                                color: coloresPorEstado[estado] ?? Colors.grey,
-                                radius: 30,
-                                showTitle: false,
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        Text(
-                          '$_totalProyectos\nTotal',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
+                  chartWidget,
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: estados.map((estado) {
-                        final valor = _proyectosPorEstado[estado]!;
-                        final pct = _totalProyectos > 0 ? (valor / _totalProyectos * 100) : 0.0;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              CircleAvatar(radius: 5, backgroundColor: coloresPorEstado[estado] ?? Colors.grey),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(estado, style: const TextStyle(fontSize: 11)),
-                              ),
-                              Text('${pct.toStringAsFixed(0)}%', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
+                  Expanded(child: legendWidget),
+                ],
+              )
+            else
+              Column(
+                children: [
+                  Center(child: chartWidget),
+                  const SizedBox(height: 16),
+                  legendWidget,
                 ],
               ),
           ],
