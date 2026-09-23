@@ -122,21 +122,8 @@ class _ReportesPageState extends State<ReportesPage> {
   int get _totalPaginas => (_proyectosFiltrados.length / _filasPorPagina).ceil();
 
   Widget _buildBadgeEstado(String estado) {
-    Color color;
-    switch (estado) {
-      case 'APROBADO':
-        color = Colors.green;
-        break;
-      case 'RECHAZADO':
-        color = Colors.red;
-        break;
-      case 'VERIFICADO':
-      case 'VERIFICADO_INSTITUCION':
-        color = Colors.blue;
-        break;
-      default:
-        color = Colors.orange;
-    }
+    final color = Formatters.colorEstadoProceso(estado);
+    final label = Formatters.formatearEstadoProceso(estado);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -146,7 +133,7 @@ class _ReportesPageState extends State<ReportesPage> {
         border: Border.all(color: color),
       ),
       child: Text(
-        estado,
+        label,
         style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 11),
       ),
     );
@@ -164,7 +151,7 @@ class _ReportesPageState extends State<ReportesPage> {
         p.nombre,
         p.posibleFuenteFinanciamientoNombre ?? 'N/A',
         p.costoTotal.toStringAsFixed(2),
-        p.estadoProceso,
+        Formatters.formatearEstadoProceso(p.estadoProceso),
       ]);
     }
 
@@ -224,7 +211,7 @@ class _ReportesPageState extends State<ReportesPage> {
                 p.nombre,
                 p.posibleFuenteFinanciamientoNombre ?? 'N/A',
                 Formatters.formatearLempiras(p.costoTotal),
-                p.estadoProceso,
+                Formatters.formatearEstadoProceso(p.estadoProceso),
               ];
             }),
           ),
@@ -276,7 +263,7 @@ class _ReportesPageState extends State<ReportesPage> {
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
                       pw.Text('ESTADO BIP', style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo900)),
-                      pw.Text(p.estadoProceso, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo900)),
+                      pw.Text(Formatters.formatearEstadoProceso(p.estadoProceso), style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColors.indigo900)),
                     ],
                   ),
                 ),

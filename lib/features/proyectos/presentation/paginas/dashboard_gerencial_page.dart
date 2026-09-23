@@ -457,13 +457,6 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
 
   Widget _buildEstadoGeneralCard(bool isDesktop) {
     final estados = _proyectosPorEstado.keys.toList();
-    final coloresPorEstado = {
-      'INGRESADO': Colors.blueGrey,
-      'VERIFICADO': Colors.blue,
-      'VERIFICADO_INSTITUCION': Colors.orange,
-      'APROBADO': Colors.green,
-      'RECHAZADO': Colors.red,
-    };
 
     final chartWidget = SizedBox(
       height: 150,
@@ -479,7 +472,7 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
                 final valor = _proyectosPorEstado[estado]!;
                 return PieChartSectionData(
                   value: valor.toDouble(),
-                  color: coloresPorEstado[estado] ?? Colors.grey,
+                  color: Formatters.colorEstadoProceso(estado),
                   radius: 28,
                   showTitle: false,
                 );
@@ -500,15 +493,17 @@ class _DashboardGerencialPageState extends State<DashboardGerencialPage> {
       children: estados.map((estado) {
         final valor = _proyectosPorEstado[estado]!;
         final pct = _totalProyectos > 0 ? (valor / _totalProyectos * 100) : 0.0;
+        final color = Formatters.colorEstadoProceso(estado);
+        final label = Formatters.formatearEstadoProceso(estado);
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             children: [
-              CircleAvatar(radius: 5, backgroundColor: coloresPorEstado[estado] ?? Colors.grey),
+              CircleAvatar(radius: 5, backgroundColor: color),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  estado,
+                  label,
                   style: const TextStyle(fontSize: 11),
                   overflow: TextOverflow.ellipsis,
                 ),

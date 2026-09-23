@@ -133,7 +133,7 @@ Future<Map<String, dynamic>> obtenerMetricasDashboard({String? institucionId}) a
     final estado = row['estado_proceso'] ?? 'INGRESADO';
     proyectosPorEstado[estado] = (proyectosPorEstado[estado] ?? 0) + 1;
 
-    if (estado == 'APROBADO') {
+    if (estado == 'APROBADO' || estado == 'APROBADO_DGIP') {
       totalAprobados++;
     }
 
