@@ -350,39 +350,27 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
                     DataCell(Text('Lps ${Formatters.formatearLempiras(p.costoTotal)}')),
                     DataCell(Text(p.periodoEjecucion)),
                     DataCell(
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: p.estadoProceso == 'APROBADO_INSTITUCION'
-                              ? Colors.green.withValues(alpha: 0.05)
-                              : p.estadoProceso == 'VERIFICADO_INSTITUCION'
-                                  ? Colors.blue.withValues(alpha: 0.05)
-                                  : Colors.orange.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: p.estadoProceso == 'APROBADO_INSTITUCION'
-                                ? Colors.green
-                                : p.estadoProceso == 'VERIFICADO_INSTITUCION'
-                                    ? Colors.blue
-                                    : Colors.orange,
-                          ),
-                        ),
-                        child: Text(
-                          p.estadoProceso == 'VERIFICADO_INSTITUCION'
-                              ? 'VERIFICADO INST.'
-                              : p.estadoProceso == 'APROBADO_INSTITUCION'
-                                  ? 'APROBADO INST.'
-                                  : p.estadoProceso,
-                          style: TextStyle(
-                            color: p.estadoProceso == 'APROBADO_INSTITUCION'
-                                ? Colors.green.shade800
-                                : p.estadoProceso == 'VERIFICADO_INSTITUCION'
-                                    ? Colors.blue.shade800
-                                    : Colors.orange.shade800,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                        ),
+                      Builder(
+                        builder: (context) {
+                          final color = Formatters.colorEstadoProceso(p.estadoProceso);
+                          final label = Formatters.formatearEstadoProceso(p.estadoProceso);
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: color),
+                            ),
+                            child: Text(
+                              label,
+                              style: TextStyle(
+                                color: color,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     DataCell(
@@ -477,39 +465,27 @@ class _BandejaProyectosPageState extends State<BandejaProyectosPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: p.estadoProceso == 'APROBADO_INSTITUCION'
-                            ? Colors.green.withValues(alpha: 0.05)
-                            : p.estadoProceso == 'VERIFICADO_INSTITUCION'
-                                ? Colors.blue.withValues(alpha: 0.05)
-                                : Colors.orange.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: p.estadoProceso == 'APROBADO_INSTITUCION'
-                              ? Colors.green
-                              : p.estadoProceso == 'VERIFICADO_INSTITUCION'
-                                  ? Colors.blue
-                                  : Colors.orange,
-                        ),
-                      ),
-                      child: Text(
-                        p.estadoProceso == 'VERIFICADO_INSTITUCION'
-                            ? 'VERIFICADO INST.'
-                            : p.estadoProceso == 'APROBADO_INSTITUCION'
-                                ? 'APROBADO INST.'
-                                : p.estadoProceso,
-                        style: TextStyle(
-                          color: p.estadoProceso == 'APROBADO_INSTITUCION'
-                              ? Colors.green.shade800
-                              : p.estadoProceso == 'VERIFICADO_INSTITUCION'
-                                  ? Colors.blue.shade800
-                                  : Colors.orange.shade800,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 9,
-                        ),
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final color = Formatters.colorEstadoProceso(p.estadoProceso);
+                        final label = Formatters.formatearEstadoProceso(p.estadoProceso);
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: color),
+                          ),
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 9,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

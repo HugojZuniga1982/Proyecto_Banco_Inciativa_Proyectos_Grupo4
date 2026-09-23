@@ -140,33 +140,151 @@ class _DetalleProyectoPageState extends State<DetalleProyectoPage> {
 
   Widget _buildWorkflowBar() {
     final userSp = ServicioPermisos();
+    final isDesktop = MediaQuery.of(context).size.width > 700;
     Color statusColor;
-    String displayState = _estadoProceso;
+    String displayState = Formatters.formatearEstadoProceso(_estadoProceso);
+    statusColor = Formatters.colorEstadoProceso(_estadoProceso);
 
-    switch (_estadoProceso) {
-      case 'VERIFICADO_INSTITUCION':
-        statusColor = Colors.blue;
-        displayState = 'VERIFICADO INST.';
-        break;
-      case 'APROBADO_INSTITUCION':
-        statusColor = Colors.teal;
-        displayState = 'APROBADO INST.';
-        break;
-      case 'VERIFICADO':
-        statusColor = Colors.indigo;
-        displayState = 'VERIFICADO DGIP';
-        break;
-      case 'APROBADO':
-        statusColor = Colors.green;
-        displayState = 'APROBADO';
-        break;
-      case 'RECHAZADO':
-        statusColor = Colors.red;
-        displayState = 'RECHAZADO';
-        break;
-      default:
-        statusColor = Colors.orange;
-        displayState = _estadoProceso;
+    final statusBadge = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'Estado del Proceso: ',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: statusColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: statusColor),
+          ),
+          child: Text(
+            displayState,
+            style: TextStyle(
+              color: statusColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    Widget actionsWidget;
+    if (_actualizando) {
+      actionsWidget = const SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    } else {
+      actionsWidget = Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          // 1. From INGRESADO -> VERIFICADO_INSTITUCION (for older projects)
+          if (_estadoProceso == 'INGRESADO' &&
+              (userSp.esFormuladorODirectorUpeg || userSp.esAdministradorGlobal)) ...[
+            ElevatedButton.icon(
+              icon: const Icon(Icons.send, size: 16),
+              label: const Text('Enviar a Verificación'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => _actualizarEstado('VERIFICADO_INSTITUCION'),
+            ),
+          ],
+
+          // 2. From VERIFICADO_INSTITUCION -> APROBADO_INSTITUCION (UPEG Approver role)
+          if (_estadoProceso == 'VERIFICADO_INSTITUCION' &&
+              (userSp.esAprobadorUpeg || userSp.esAdministradorGlobal)) ...[
+            ElevatedButton.icon(
+              icon: const Icon(Icons.verified_user, size: 16),
+              label: const Text('Aprobar Institución'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => _actualizarEstado('APROBADO_INSTITUCION'),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.close, size: 16),
+              label: const Text('Rechazar'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: const BorderSide(color: Colors.red),
+              ),
+              onPressed: () => _actualizarEstado('RECHAZADO'),
+            ),
+          ],
+
+          // 3. From APROBADO_INSTITUCION -> VERIFICADO (DGIP Analista/Coordinador)
+          if (_estadoProceso == 'APROBADO_INSTITUCION' &&
+              (userSp.tiene('preinversion.proyectos.verificar') || userSp.esAdministradorGlobal)) ...[
+            ElevatedButton.icon(
+              icon: const Icon(Icons.check_circle, size: 16),
+              label: const Text('Verificar Ficha (DGIP)'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => _actualizarEstado('VERIFICADO'),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.close, size: 16),
+              label: const Text('Rechazar'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: const BorderSide(color: Colors.red),
+              ),
+              onPressed: () => _actualizarEstado('RECHAZADO'),
+            ),
+          ],
+
+          // 4. From VERIFICADO -> APROBADO (DGIP Director)
+          if ((_estadoProceso == 'VERIFICADO' || _estadoProceso == 'VERIFICADO_DGIP') &&
+              (userSp.tiene('preinversion.proyectos.aprobar') || userSp.esAdministradorGlobal)) ...[
+            ElevatedButton.icon(
+              icon: const Icon(Icons.stars, size: 16),
+              label: const Text('Aprobar Ficha (DGIP)'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => _actualizarEstado('APROBADO'),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.close, size: 16),
+              label: const Text('Rechazar'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: const BorderSide(color: Colors.red),
+              ),
+              onPressed: () => _actualizarEstado('RECHAZADO'),
+            ),
+          ],
+
+          // 5. Reset process if rejected
+          if (_estadoProceso == 'RECHAZADO' &&
+              (userSp.esAdministradorGlobal ||
+                  userSp.esFormuladorODirectorUpeg ||
+                  userSp.tiene('preinversion.proyectos.verificar'))) ...[
+            ElevatedButton.icon(
+              icon: const Icon(Icons.settings_backup_restore, size: 16),
+              label: const Text('Reiniciar Proceso'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => _actualizarEstado('VERIFICADO_INSTITUCION'),
+            ),
+          ],
+        ],
+      );
     }
 
     return Card(
@@ -174,151 +292,22 @@ class _DetalleProyectoPageState extends State<DetalleProyectoPage> {
       elevation: 1,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Left side: current status badge
-            Row(
-              children: [
-                const Text(
-                  'Estado del Proceso: ',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: statusColor),
-                  ),
-                  child: Text(
-                    displayState,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Right side: transition actions depending on user role
-            if (_actualizando)
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            else
-              Row(
+        child: isDesktop
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 1. From INGRESADO -> VERIFICADO_INSTITUCION (for older projects)
-                  if (_estadoProceso == 'INGRESADO' &&
-                      (userSp.esFormuladorODirectorUpeg || userSp.esAdministradorGlobal)) ...[
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.send, size: 16),
-                      label: const Text('Enviar a Verificación'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () => _actualizarEstado('VERIFICADO_INSTITUCION'),
-                    ),
-                  ],
-
-                  // 2. From VERIFICADO_INSTITUCION -> APROBADO_INSTITUCION (UPEG Approver role)
-                  if (_estadoProceso == 'VERIFICADO_INSTITUCION' &&
-                      (userSp.esAprobadorUpeg || userSp.esAdministradorGlobal)) ...[
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.verified_user, size: 16),
-                      label: const Text('Aprobar Institución'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () => _actualizarEstado('APROBADO_INSTITUCION'),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.close, size: 16),
-                      label: const Text('Rechazar'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                      ),
-                      onPressed: () => _actualizarEstado('RECHAZADO'),
-                    ),
-                  ],
-
-                  // 3. From APROBADO_INSTITUCION -> VERIFICADO (DGIP Analista/Coordinador)
-                  if (_estadoProceso == 'APROBADO_INSTITUCION' &&
-                      (userSp.tiene('preinversion.proyectos.verificar') || userSp.esAdministradorGlobal)) ...[
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.check_circle, size: 16),
-                      label: const Text('Verificar Ficha (DGIP)'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () => _actualizarEstado('VERIFICADO'),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.close, size: 16),
-                      label: const Text('Rechazar'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                      ),
-                      onPressed: () => _actualizarEstado('RECHAZADO'),
-                    ),
-                  ],
-
-                  // 4. From VERIFICADO -> APROBADO (DGIP Director)
-                  if (_estadoProceso == 'VERIFICADO' &&
-                      (userSp.tiene('preinversion.proyectos.aprobar') || userSp.esAdministradorGlobal)) ...[
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.stars, size: 16),
-                      label: const Text('Aprobar Ficha Global'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () => _actualizarEstado('APROBADO'),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.close, size: 16),
-                      label: const Text('Rechazar'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                      ),
-                      onPressed: () => _actualizarEstado('RECHAZADO'),
-                    ),
-                  ],
-
-                  // 5. Reset process if rejected
-                  if (_estadoProceso == 'RECHAZADO' &&
-                      (userSp.esAdministradorGlobal ||
-                          userSp.esFormuladorODirectorUpeg ||
-                          userSp.tiene('preinversion.proyectos.verificar'))) ...[
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.settings_backup_restore, size: 16),
-                      label: const Text('Reiniciar Proceso'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () => _actualizarEstado('VERIFICADO_INSTITUCION'),
-                    ),
-                  ],
+                  statusBadge,
+                  actionsWidget,
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  statusBadge,
+                  const SizedBox(height: 12),
+                  actionsWidget,
                 ],
               ),
-          ],
-        ),
       ),
     );
   }
